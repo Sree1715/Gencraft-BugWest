@@ -270,6 +270,7 @@ export const CodeEditorArena: React.FC<CodeEditorArenaProps> = ({
         <div className="flex items-center gap-3">
           <RoundTimer
             initialSeconds={round.durationMinutes * 60}
+            endTime={round.endTime}
             onTimeExpired={onCompleteRound}
           />
 

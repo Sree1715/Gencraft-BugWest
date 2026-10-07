@@ -47,13 +47,13 @@ export const AuthModal: React.FC<AuthModalProps> = ({
   if (!isOpen) return null;
 
   // Handle participant login with Team Name + Bugfest Code
-  const handleParticipantSubmit = (e: React.FormEvent) => {
+  const handleParticipantSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     setError(null);
     setLoading(true);
 
-    setTimeout(() => {
-      const result = competitionStore.loginParticipantWithTeamCode(teamName, bugfestCode);
+    try {
+      const result = await competitionStore.loginParticipantWithTeamCode(teamName, bugfestCode);
       setLoading(false);
 
       if (result.success && result.user) {
@@ -62,7 +62,10 @@ export const AuthModal: React.FC<AuthModalProps> = ({
       } else {
         setError(result.error || 'Invalid Team Name or Bugfest Code. Please check the code provided by the organizing coordination team.');
       }
-    }, 250);
+    } catch (err: any) {
+      setLoading(false);
+      setError(err.message || 'An unexpected error occurred while logging in.');
+    }
   };
 
   // Handle organizer login

@@ -2,47 +2,53 @@ import React, { useState, useEffect } from 'react';
 import { Clock, AlertTriangle } from 'lucide-react';
 
 interface RoundTimerProps {
-  initialSeconds: number;
+  initialSeconds?: number;
+  endTime?: string | null;
   onTimeExpired: () => void;
   onTick?: (secondsLeft: number) => void;
   isPaused?: boolean;
 }
 
 export const RoundTimer: React.FC<RoundTimerProps> = ({
-  initialSeconds,
+  initialSeconds = 1200,
+  endTime,
   onTimeExpired,
   onTick,
   isPaused = false
 }) => {
-  const [secondsLeft, setSecondsLeft] = useState(initialSeconds);
+  const calculateSecondsLeft = (): number => {
+    if (endTime) {
+      const endMs = new Date(endTime).getTime();
+      const nowMs = Date.now();
+      const diffSec = Math.floor((endMs - nowMs) / 1000);
+      return Math.max(0, diffSec);
+    }
+    return initialSeconds;
+  };
 
+  const [secondsLeft, setSecondsLeft] = useState<number>(calculateSecondsLeft);
+
+  // Recalculate if endTime or initialSeconds changes
   useEffect(() => {
-    setSecondsLeft(initialSeconds);
-  }, [initialSeconds]);
+    setSecondsLeft(calculateSecondsLeft());
+  }, [endTime, initialSeconds]);
 
   useEffect(() => {
     if (isPaused) return;
 
-    if (secondsLeft <= 0) {
-      onTimeExpired();
-      return;
-    }
-
     const timer = setInterval(() => {
-      setSecondsLeft((prev) => {
-        const next = prev - 1;
-        if (onTick) onTick(next);
-        if (next <= 0) {
-          clearInterval(timer);
-          onTimeExpired();
-          return 0;
-        }
-        return next;
-      });
+      const remaining = calculateSecondsLeft();
+      setSecondsLeft(remaining);
+      if (onTick) onTick(remaining);
+
+      if (remaining <= 0) {
+        clearInterval(timer);
+        onTimeExpired();
+      }
     }, 1000);
 
     return () => clearInterval(timer);
-  }, [secondsLeft, isPaused, onTimeExpired, onTick]);
+  }, [endTime, isPaused, onTimeExpired, onTick]);
 
   const minutes = Math.floor(secondsLeft / 60);
   const seconds = secondsLeft % 60;
