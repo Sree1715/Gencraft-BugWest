@@ -311,10 +311,11 @@ export const competitionStore = {
     // Send to backend DB
     const res = await apiClient.updateRound(roundId, payload);
     if (res.success && res.round) {
+      const updatedRound = res.round;
       // Merge the updated round, preserving bugfestCode from updates
       cachedRounds = cachedRounds.map((r) =>
         r.roundId === roundId
-          ? { ...r, ...res.round, bugfestCode: updates.bugfestCode ?? res.round.bugfestCode ?? r.bugfestCode }
+          ? { ...r, ...updatedRound, bugfestCode: updates.bugfestCode ?? updatedRound.bugfestCode ?? r.bugfestCode }
           : r
       );
       emitter.notify();
@@ -324,6 +325,53 @@ export const competitionStore = {
   // Access Codes
   getAccessCodes(): AccessCodeRecord[] {
     return INITIAL_ACCESS_CODES;
+  },
+
+  batchGenerateOrganizerCodes(count: number = 5): AccessCodeRecord[] {
+    const newCodes: AccessCodeRecord[] = [];
+    for (let i = 0; i < count; i++) {
+      const codeNum = Math.floor(1000 + Math.random() * 9000);
+      const accessCode = `BF-${codeNum}`;
+      const record: AccessCodeRecord = {
+        accessCode,
+        userId: `team-${codeNum}`,
+        name: `Team ${codeNum}`,
+        teamName: `Team ${codeNum}`,
+        college: 'Registered Institution',
+        createdAt: new Date().toISOString().replace('T', ' ').substring(0, 16),
+        isUsed: false
+      };
+      INITIAL_ACCESS_CODES.push(record);
+      newCodes.push(record);
+    }
+    emitter.notify();
+    return newCodes;
+  },
+
+  generateRandomParticipantCode(name: string, college: string): { accessCode: string; user: User } {
+    const codeNum = Math.floor(1000 + Math.random() * 9000);
+    const accessCode = `BF-${codeNum}`;
+    const userId = `team-${name.toLowerCase().replace(/[^a-z0-9]/g, '') || codeNum}`;
+    const user: User = {
+      id: `usr-${userId}`,
+      userId,
+      accessCode,
+      name,
+      teamName: name,
+      college: college || 'Participant Institute',
+      role: 'participant'
+    };
+    INITIAL_ACCESS_CODES.push({
+      accessCode,
+      userId,
+      name,
+      teamName: name,
+      college: college || 'Participant Institute',
+      createdAt: new Date().toISOString().replace('T', ' ').substring(0, 16),
+      isUsed: false
+    });
+    emitter.notify();
+    return { accessCode, user };
   },
 
   // Auth & Login

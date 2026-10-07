@@ -1,6 +1,6 @@
 import React from 'react';
 import { RoundConfig } from '../../types';
-import { Award, CheckCircle, ArrowRight, Clock, Target, Layers } from 'lucide-react';
+import { Award, CheckCircle, ArrowRight, Clock, Target, Layers, X } from 'lucide-react';
 
 interface RoundResultModalProps {
   isOpen: boolean;
@@ -14,6 +14,7 @@ interface RoundResultModalProps {
   isFinalRound: boolean;
   isNextRoundUnlocked: boolean;
   onProceed: () => void;
+  onClose?: () => void;
   onBackToDashboard: () => void;
 }
 
@@ -29,19 +30,32 @@ export const RoundResultModal: React.FC<RoundResultModalProps> = ({
   isFinalRound,
   isNextRoundUnlocked,
   onProceed,
+  onClose,
   onBackToDashboard
 }) => {
   if (!isOpen) return null;
 
+  const handleClose = onClose || onBackToDashboard;
+
   return (
     <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-slate-900/70 backdrop-blur-xs">
       <div 
-        className="bg-white rounded-xl shadow-2xl border border-slate-200 max-w-lg w-full overflow-hidden animate-in fade-in zoom-in-95 duration-200"
+        className="bg-white rounded-xl shadow-2xl border border-slate-200 max-w-lg w-full overflow-hidden animate-in fade-in zoom-in-95 duration-200 relative"
         role="dialog"
         aria-modal="true"
       >
         {/* Header */}
         <div className="bg-slate-900 text-white p-6 text-center relative overflow-hidden">
+          {/* Top Right Close 'X' Button */}
+          <button
+            onClick={handleClose}
+            className="absolute top-3.5 right-3.5 p-1.5 rounded-lg text-slate-400 hover:text-white hover:bg-slate-800 transition-colors focus:outline-hidden"
+            aria-label="Close"
+            title="Close"
+          >
+            <X className="w-5 h-5" />
+          </button>
+
           <div className="w-12 h-12 rounded-full bg-blue-600/20 border border-blue-500/30 text-blue-400 flex items-center justify-center mx-auto mb-3">
             <Award className="w-6 h-6" />
           </div>

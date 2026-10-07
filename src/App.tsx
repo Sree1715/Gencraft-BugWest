@@ -249,6 +249,7 @@ export default function App() {
              store.getRound((completedRoundConfig.roundId + 1) as 1 | 2 | 3)?.status === 'ready')
           }
           onProceed={handleProceedFromRoundResult}
+          onClose={() => setIsRoundResultModalOpen(false)}
           onBackToDashboard={() => {
             setIsRoundResultModalOpen(false);
             setActiveView('participant-dashboard');
