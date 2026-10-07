@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useRef } from 'react';
 import { Clock, AlertTriangle } from 'lucide-react';
 
 interface RoundTimerProps {
@@ -16,6 +16,10 @@ export const RoundTimer: React.FC<RoundTimerProps> = ({
   onTick,
   isPaused = false
 }) => {
+  const hasFiredRef = useRef(false);
+  const onTimeExpiredRef = useRef(onTimeExpired);
+  onTimeExpiredRef.current = onTimeExpired;
+
   const calculateSecondsLeft = (): number => {
     if (endTime) {
       const endMs = new Date(endTime).getTime();
@@ -28,13 +32,26 @@ export const RoundTimer: React.FC<RoundTimerProps> = ({
 
   const [secondsLeft, setSecondsLeft] = useState<number>(calculateSecondsLeft);
 
-  // Recalculate if endTime or initialSeconds changes
+  // Recalculate and reset fired flag when endTime or initialSeconds changes
   useEffect(() => {
-    setSecondsLeft(calculateSecondsLeft());
+    const remaining = calculateSecondsLeft();
+    setSecondsLeft(remaining);
+    if (remaining > 0) {
+      hasFiredRef.current = false;
+    }
   }, [endTime, initialSeconds]);
 
   useEffect(() => {
     if (isPaused) return;
+
+    const initial = calculateSecondsLeft();
+    if (initial <= 0) {
+      // If already expired at mount, don't repeatedly trigger
+      if (!hasFiredRef.current) {
+        hasFiredRef.current = true;
+      }
+      return;
+    }
 
     const timer = setInterval(() => {
       const remaining = calculateSecondsLeft();
@@ -43,12 +60,15 @@ export const RoundTimer: React.FC<RoundTimerProps> = ({
 
       if (remaining <= 0) {
         clearInterval(timer);
-        onTimeExpired();
+        if (!hasFiredRef.current) {
+          hasFiredRef.current = true;
+          onTimeExpiredRef.current();
+        }
       }
     }, 1000);
 
     return () => clearInterval(timer);
-  }, [endTime, isPaused, onTimeExpired, onTick]);
+  }, [endTime, isPaused, onTick]);
 
   const minutes = Math.floor(secondsLeft / 60);
   const seconds = secondsLeft % 60;
