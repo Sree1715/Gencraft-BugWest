@@ -1,0 +1,713 @@
+import React, { useState, useEffect } from 'react';
+import { 
+  Question, 
+  RoundConfig, 
+  Submission, 
+  ExecutionResult,
+  ParticipantSession,
+  LiveScoreboardEntry
+} from '../../types';
+import { ExecutionService } from '../../services/executionService';
+import { competitionStore } from '../../store/competitionStore';
+import { QuestionNavigation } from './QuestionNavigation';
+import { RoundTimer } from './RoundTimer';
+import { 
+  Play, 
+  RotateCcw, 
+  Send, 
+  CheckCircle, 
+  XCircle, 
+  AlertCircle, 
+  Clock, 
+  Code2, 
+  FileText, 
+  Terminal as TerminalIcon,
+  HelpCircle,
+  ArrowLeft,
+  ChevronLeft,
+  ChevronRight,
+  Trophy,
+  Zap,
+  Radio,
+  Check,
+  X
+} from 'lucide-react';
+
+interface CodeEditorArenaProps {
+  round: RoundConfig;
+  questions: Question[];
+  session: ParticipantSession;
+  onSaveDraft: (questionId: string, code: string) => void;
+  onSubmitQuestion: (submission: Submission) => void;
+  onCompleteRound: () => void;
+  onBackToDashboard: () => void;
+}
+
+export const CodeEditorArena: React.FC<CodeEditorArenaProps> = ({
+  round,
+  questions,
+  session,
+  onSaveDraft,
+  onSubmitQuestion,
+  onCompleteRound,
+  onBackToDashboard
+}) => {
+  const [currentIdx, setCurrentIdx] = useState(0);
+  const currentQuestion = questions[currentIdx] || questions[0];
+
+  const teamName = session.teamName || session.name;
+
+  // Active code state
+  const [code, setCode] = useState('');
+  const [isRunning, setIsRunning] = useState(false);
+  const [isSubmitting, setIsSubmitting] = useState(false);
+  const [execResult, setExecResult] = useState<ExecutionResult | null>(null);
+  const [submissionFeedback, setSubmissionFeedback] = useState<string | null>(null);
+  const [mobileTab, setMobileTab] = useState<'editor' | 'results' | 'scoreboard'>('editor');
+  const [showSubmitRoundConfirm, setShowSubmitRoundConfirm] = useState(false);
+
+  // Live Scoreboard state from competition store
+  const [scoreboard, setScoreboard] = useState<LiveScoreboardEntry[]>(() =>
+    competitionStore.getLiveScoreboard(teamName)
+  );
+
+  // Subscribe to live scoreboard updates
+  useEffect(() => {
+    const updateBoard = () => {
+      setScoreboard(competitionStore.getLiveScoreboard(teamName));
+    };
+    updateBoard();
+    return competitionStore.subscribe(updateBoard);
+  }, [teamName]);
+
+  // Sync code on question change
+  useEffect(() => {
+    if (!currentQuestion) return;
+    const existingDraft = session.codeDrafts[currentQuestion.id];
+    const existingSubmission = session.submissions[currentQuestion.id];
+
+    if (existingSubmission) {
+      setCode(existingSubmission.submittedCode);
+    } else if (existingDraft !== undefined) {
+      setCode(existingDraft);
+    } else {
+      setCode(currentQuestion.buggyCode);
+    }
+
+    setExecResult(null);
+    setSubmissionFeedback(null);
+  }, [currentQuestion?.id, session]);
+
+  if (!currentQuestion) {
+    return (
+      <div className="max-w-4xl mx-auto p-12 text-center">
+        <h2 className="text-xl font-bold text-slate-900 mb-2">No Questions in This Round</h2>
+        <p className="text-slate-500 text-sm mb-4">
+          The organizer has not yet published questions for Round {round.roundId}.
+        </p>
+        <button
+          onClick={onBackToDashboard}
+          className="px-4 py-2 bg-slate-900 text-white rounded-lg text-xs font-semibold"
+        >
+          Return to Dashboard
+        </button>
+      </div>
+    );
+  }
+
+  const existingSubmission = session.submissions[currentQuestion.id];
+  const isQuestionSubmitted = !!existingSubmission;
+
+  // Handle code change with draft persistence
+  const handleCodeChange = (e: React.ChangeEvent<HTMLTextAreaElement>) => {
+    const val = e.target.value;
+    setCode(val);
+    onSaveDraft(currentQuestion.id, val);
+  };
+
+  // Keyboard tab indentation handling
+  const handleKeyDown = (e: React.KeyboardEvent<HTMLTextAreaElement>) => {
+    if (e.key === 'Tab') {
+      e.preventDefault();
+      const textarea = e.currentTarget;
+      const start = textarea.selectionStart;
+      const end = textarea.selectionEnd;
+      const spaces = '    ';
+      const newCode = code.substring(0, start) + spaces + code.substring(end);
+      setCode(newCode);
+      onSaveDraft(currentQuestion.id, newCode);
+      setTimeout(() => {
+        textarea.selectionStart = textarea.selectionEnd = start + 4;
+      }, 0);
+    }
+  };
+
+  // Reset to original buggy starter code
+  const handleResetCode = () => {
+    if (window.confirm('Reset this question back to the original starter buggy code?')) {
+      setCode(currentQuestion.buggyCode);
+      onSaveDraft(currentQuestion.id, currentQuestion.buggyCode);
+      setExecResult(null);
+      setSubmissionFeedback(null);
+    }
+  };
+
+  // Run Code (Visible Tests Only)
+  const handleRunCode = () => {
+    setIsRunning(true);
+    setTimeout(() => {
+      const result = ExecutionService.runVisibleTests(currentQuestion, code);
+      setExecResult(result);
+      setIsRunning(false);
+      setSubmissionFeedback('Run completed. Verified against visible assertions.');
+      if (window.innerWidth < 1024) setMobileTab('results');
+    }, 200);
+  };
+
+  // Submit Solution (Graded against visible + hidden tests)
+  const handleSubmitCode = () => {
+    setIsSubmitting(true);
+    setTimeout(() => {
+      const result = ExecutionService.evaluateFullSubmission(currentQuestion, code);
+      setExecResult(result);
+
+      // Create submission record
+      const sub: Submission = {
+        id: `sub-${Date.now()}-${Math.random().toString(36).substr(2, 4)}`,
+        participantId: session.userId,
+        participantName: teamName,
+        questionId: currentQuestion.id,
+        questionTitle: currentQuestion.title,
+        round: round.roundId,
+        language: currentQuestion.language,
+        submittedCode: code,
+        result: result.success ? 'Passed' : result.marksEarned > 0 ? 'Partial' : 'Failed',
+        marksEarned: result.marksEarned,
+        maxMarks: currentQuestion.marks,
+        testsPassed: result.passedTests,
+        totalTests: result.totalTests,
+        timestamp: new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' }),
+        executionTimeMs: result.executionTimeMs,
+        testResults: result.testCaseResults
+      };
+
+      onSubmitQuestion(sub);
+      setIsSubmitting(false);
+      setSubmissionFeedback(`Submitted! Scored ${result.marksEarned} / ${currentQuestion.marks} marks.`);
+      if (window.innerWidth < 1024) setMobileTab('results');
+    }, 300);
+  };
+
+  // Line numbers
+  const lineCount = Math.max(code.split('\n').length, 14);
+  const lineNumbers = Array.from({ length: lineCount }, (_, i) => i + 1);
+
+  // Participant Score calculations
+  const solvedCount = Object.values(session.submissions).filter(
+    (s) => s.round === round.roundId && s.result === 'Passed'
+  ).length;
+
+  const currentQuestionScore = existingSubmission
+    ? existingSubmission.marksEarned
+    : execResult
+    ? execResult.marksEarned
+    : 0;
+
+  const currentQuestionTestsPassed = existingSubmission
+    ? existingSubmission.testsPassed
+    : execResult
+    ? execResult.passedTests
+    : 0;
+
+  const currentQuestionTotalTests = existingSubmission
+    ? existingSubmission.totalTests
+    : execResult
+    ? execResult.totalTests
+    : currentQuestion.visibleTestCases.length;
+
+  const currentRoundScore = session.roundScores[round.roundId] || 0;
+
+  return (
+    <div className="flex-1 flex flex-col bg-slate-100/80 min-h-screen">
+      
+      {/* ==================================================== */}
+      {/* TOP ARENA BAR: YOU ARE COMPETING LIVE */}
+      {/* ==================================================== */}
+      <div className="bg-slate-900 border-b border-slate-800 text-white px-4 py-2.5 flex flex-wrap items-center justify-between gap-3 sticky top-16 z-30 shadow-md">
+        
+        {/* Left: Live Indicator & Round Title */}
+        <div className="flex items-center gap-3">
+          <button
+            onClick={onBackToDashboard}
+            className="p-1.5 hover:bg-slate-800 text-slate-400 hover:text-white rounded-lg transition-colors flex items-center gap-1 text-xs font-semibold"
+            title="Return to Instructions"
+          >
+            <ArrowLeft className="w-4 h-4" />
+            <span className="hidden sm:inline">Instructions</span>
+          </button>
+
+          <div className="h-5 w-px bg-slate-800 hidden sm:block"></div>
+
+          <div className="flex items-center gap-2">
+            <span className="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full bg-red-950/80 border border-red-500/40 text-red-400 text-xs font-bold tracking-wider animate-pulse">
+              <span className="w-2 h-2 rounded-full bg-red-500"></span>
+              <span>YOU ARE COMPETING LIVE</span>
+            </span>
+
+            <span className="text-xs font-mono font-bold text-slate-300 hidden md:inline">
+              {round.title} · {round.subtitle}
+            </span>
+          </div>
+        </div>
+
+        {/* Center: Team Name */}
+        <div className="text-xs font-mono hidden lg:flex items-center gap-2 bg-slate-800/80 px-3 py-1 rounded-md border border-slate-700/60">
+          <span className="text-slate-400 font-sans">Team:</span>
+          <strong className="text-white font-bold">{teamName}</strong>
+        </div>
+
+        {/* Right: Timer & Finish Round */}
+        <div className="flex items-center gap-3">
+          <RoundTimer
+            initialSeconds={round.durationMinutes * 60}
+            onTimeExpired={onCompleteRound}
+          />
+
+          <button
+            onClick={() => setShowSubmitRoundConfirm(true)}
+            className="px-3 py-1.5 bg-blue-600 hover:bg-blue-700 text-white text-xs font-bold rounded-lg transition-colors shadow-2xs whitespace-nowrap"
+          >
+            Complete Round
+          </button>
+        </div>
+
+      </div>
+
+      {/* Question Palette Navigation (1 2 3 ... 20) */}
+      <QuestionNavigation
+        questions={questions}
+        currentQuestionIndex={currentIdx}
+        onSelectQuestion={(idx) => setCurrentIdx(idx)}
+        visitedQuestions={session.visitedQuestions}
+        codeDrafts={session.codeDrafts}
+        submissions={session.submissions}
+      />
+
+      {/* Mobile Tab Switcher */}
+      <div className="lg:hidden flex border-b border-slate-200 bg-white shadow-2xs">
+        <button
+          onClick={() => setMobileTab('editor')}
+          className={`flex-1 py-2.5 text-xs font-bold text-center border-b-2 transition-colors ${
+            mobileTab === 'editor' ? 'border-blue-600 text-blue-600' : 'border-transparent text-slate-500'
+          }`}
+        >
+          Editor & Problem
+        </button>
+        <button
+          onClick={() => setMobileTab('results')}
+          className={`flex-1 py-2.5 text-xs font-bold text-center border-b-2 transition-colors ${
+            mobileTab === 'results' ? 'border-blue-600 text-blue-600' : 'border-transparent text-slate-500'
+          }`}
+        >
+          Test Results & Scorecard
+        </button>
+        <button
+          onClick={() => setMobileTab('scoreboard')}
+          className={`flex-1 py-2.5 text-xs font-bold text-center border-b-2 transition-colors ${
+            mobileTab === 'scoreboard' ? 'border-blue-600 text-blue-600' : 'border-transparent text-slate-500'
+          }`}
+        >
+          Live Scoreboard ({scoreboard.length})
+        </button>
+      </div>
+
+      {/* ==================================================== */}
+      {/* MAIN ARENA WORKSPACE: LEFT EDITOR | RIGHT SIDE PANELS */}
+      {/* ==================================================== */}
+      <div className="flex-1 max-w-7xl w-full mx-auto p-3 md:p-4 grid grid-cols-1 lg:grid-cols-12 gap-4">
+        
+        {/* ==================================================== */}
+        {/* LEFT / MAIN AREA: QUESTION + CODE EDITOR (7-8 COLS) */}
+        {/* ==================================================== */}
+        <div 
+          className={`lg:col-span-8 flex flex-col gap-4 ${
+            mobileTab !== 'editor' ? 'hidden lg:flex' : 'flex'
+          }`}
+        >
+          {/* Problem Statement Card */}
+          <div className="bg-white rounded-xl border border-slate-200 shadow-2xs p-4 md:p-5">
+            <div className="flex items-center justify-between pb-3 mb-3 border-b border-slate-100 gap-2">
+              <div>
+                <span className="text-[11px] font-bold text-blue-600 font-mono uppercase tracking-wider block">
+                  Question {currentIdx + 1} of {questions.length}
+                </span>
+                <h2 className="text-base sm:text-lg font-bold text-slate-900 tracking-tight">
+                  {currentQuestion.title}
+                </h2>
+              </div>
+
+              <div className="flex items-center gap-2 shrink-0">
+                <span className="px-2.5 py-1 bg-slate-100 text-slate-700 text-xs font-bold font-mono rounded">
+                  {currentQuestion.marks} Marks
+                </span>
+                <span className="px-2.5 py-1 bg-blue-50 text-blue-700 text-xs font-mono font-bold uppercase rounded border border-blue-200">
+                  {currentQuestion.language}
+                </span>
+              </div>
+            </div>
+
+            <p className="text-xs sm:text-sm text-slate-600 leading-relaxed mb-3">
+              {currentQuestion.description}
+            </p>
+
+            <div className="p-3 bg-amber-50/70 border border-amber-200/80 rounded-lg text-xs text-amber-900 flex items-start gap-2">
+              <AlertCircle className="w-4 h-4 text-amber-600 shrink-0 mt-0.5" />
+              <div>
+                <strong className="block font-semibold mb-0.5">Bug Diagnostics:</strong>
+                <span>{currentQuestion.bugDescription}</span>
+              </div>
+            </div>
+          </div>
+
+          {/* Monaco-Style Dark Code Editor Box */}
+          <div className="flex-1 flex flex-col bg-[#0D1117] rounded-xl border border-slate-800 shadow-md overflow-hidden min-h-[460px]">
+            {/* Editor Top Bar */}
+            <div className="bg-[#161B22] border-b border-slate-800 px-4 py-2.5 flex items-center justify-between">
+              <div className="flex items-center gap-2">
+                <span className="w-3 h-3 rounded-full bg-red-500/80 inline-block"></span>
+                <span className="w-3 h-3 rounded-full bg-yellow-500/80 inline-block"></span>
+                <span className="w-3 h-3 rounded-full bg-green-500/80 inline-block"></span>
+                <span className="text-xs font-mono font-semibold text-slate-300 ml-2">
+                  solution.{currentQuestion.language === 'c' ? 'c' : 'py'}
+                </span>
+                <span className="text-[11px] text-slate-500 font-mono hidden sm:inline">
+                  (GCC 13+ / Python 3.12)
+                </span>
+              </div>
+
+              <div className="flex items-center gap-2">
+                <button
+                  onClick={handleResetCode}
+                  title="Reset to starter buggy code"
+                  className="px-2.5 py-1 text-xs font-medium text-slate-400 hover:text-white hover:bg-slate-800 rounded transition-colors flex items-center gap-1"
+                >
+                  <RotateCcw className="w-3.5 h-3.5" />
+                  <span>Reset Code</span>
+                </button>
+              </div>
+            </div>
+
+            {/* Editor Area with Line Numbers */}
+            <div className="flex-1 flex font-mono text-xs overflow-hidden relative">
+              {/* Line Numbers Column */}
+              <div className="w-11 bg-[#0D1117] select-none text-slate-600 text-right pr-3 pt-3 font-mono border-r border-slate-800/70 leading-5">
+                {lineNumbers.map((num) => (
+                  <div key={num}>{num}</div>
+                ))}
+              </div>
+
+              {/* Code Textarea */}
+              <textarea
+                value={code}
+                onChange={handleCodeChange}
+                onKeyDown={handleKeyDown}
+                spellCheck={false}
+                className="flex-1 bg-transparent text-slate-100 p-3 leading-5 resize-none focus:outline-none selection:bg-blue-600/40 font-mono text-xs overflow-auto dark-scroll"
+                style={{ tabSize: 4 }}
+              />
+            </div>
+
+            {/* Action Bar (Run / Reset / Submit) */}
+            <div className="bg-[#161B22] border-t border-slate-800 px-4 py-3 flex items-center justify-between gap-3">
+              <div className="flex items-center gap-2">
+                <button
+                  disabled={currentIdx === 0}
+                  onClick={() => setCurrentIdx(currentIdx - 1)}
+                  className="px-2.5 py-1.5 text-xs text-slate-400 hover:text-white disabled:opacity-30 disabled:hover:text-slate-400 flex items-center gap-1"
+                >
+                  <ChevronLeft className="w-3.5 h-3.5" />
+                  <span className="hidden sm:inline">Prev</span>
+                </button>
+
+                <button
+                  disabled={currentIdx === questions.length - 1}
+                  onClick={() => setCurrentIdx(currentIdx + 1)}
+                  className="px-2.5 py-1.5 text-xs text-slate-400 hover:text-white disabled:opacity-30 disabled:hover:text-slate-400 flex items-center gap-1"
+                >
+                  <span className="hidden sm:inline">Next</span>
+                  <ChevronRight className="w-3.5 h-3.5" />
+                </button>
+              </div>
+
+              <div className="flex items-center gap-3">
+                <button
+                  onClick={handleRunCode}
+                  disabled={isRunning}
+                  className="px-4 py-2 bg-slate-800 hover:bg-slate-700 active:bg-slate-900 text-slate-100 text-xs font-bold rounded-lg transition-colors flex items-center gap-1.5 shadow-xs disabled:opacity-50"
+                >
+                  <Play className="w-3.5 h-3.5 fill-current text-emerald-400" />
+                  <span>{isRunning ? 'Running Tests...' : 'RUN'}</span>
+                </button>
+
+                <button
+                  onClick={handleSubmitCode}
+                  disabled={isSubmitting}
+                  className="px-5 py-2 bg-blue-600 hover:bg-blue-700 active:bg-blue-800 text-white text-xs font-bold rounded-lg transition-colors flex items-center gap-1.5 shadow-sm disabled:opacity-50"
+                >
+                  <Send className="w-3.5 h-3.5" />
+                  <span>{isSubmitting ? 'Grading...' : 'SUBMIT'}</span>
+                </button>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        {/* ==================================================== */}
+        {/* RIGHT SIDE AREA: SCORECARD + RESULTS + LIVE SCOREBOARD */}
+        {/* ==================================================== */}
+        <div 
+          className={`lg:col-span-4 flex flex-col gap-4 ${
+            mobileTab === 'editor' ? 'hidden lg:flex' : 'flex'
+          }`}
+        >
+          
+          {/* ---------------------------------------------------- */}
+          {/* CARD 1: CURRENT PARTICIPANT SCORE & ROUND PROGRESS */}
+          {/* ---------------------------------------------------- */}
+          <div className="bg-white rounded-xl border border-slate-200 shadow-2xs p-4">
+            <span className="text-[10px] font-extrabold uppercase tracking-wider text-slate-400 block mb-3 font-mono">
+              YOUR COMPETITION STATUS
+            </span>
+
+            <div className="grid grid-cols-2 gap-3">
+              <div className="p-3 bg-blue-50/70 border border-blue-200 rounded-lg">
+                <span className="text-[10px] uppercase font-bold text-blue-700 block mb-0.5">
+                  YOUR SCORE
+                </span>
+                <div className="text-2xl font-black font-mono text-blue-900">
+                  {session.totalScore}
+                </div>
+              </div>
+
+              <div className="p-3 bg-slate-50 border border-slate-200 rounded-lg">
+                <span className="text-[10px] uppercase font-bold text-slate-500 block mb-0.5">
+                  CURRENT ROUND
+                </span>
+                <div className="text-xl font-bold font-mono text-slate-900">
+                  ROUND {round.roundId}
+                </div>
+              </div>
+
+              <div className="p-3 bg-slate-50 border border-slate-200 rounded-lg">
+                <span className="text-[10px] uppercase font-bold text-slate-500 block mb-0.5">
+                  QUESTIONS SOLVED
+                </span>
+                <div className="text-base font-bold font-mono text-slate-900">
+                  {solvedCount} <span className="text-xs text-slate-400 font-normal">/ {questions.length}</span>
+                </div>
+              </div>
+
+              <div className="p-3 bg-slate-50 border border-slate-200 rounded-lg">
+                <span className="text-[10px] uppercase font-bold text-slate-500 block mb-0.5">
+                  CURRENT QUESTION
+                </span>
+                <div className="text-base font-bold font-mono text-slate-900">
+                  #{currentIdx + 1}
+                </div>
+              </div>
+            </div>
+          </div>
+
+          {/* ---------------------------------------------------- */}
+          {/* CARD 2: TEST CASE RESULTS & QUESTION SCORECARD */}
+          {/* ---------------------------------------------------- */}
+          <div className="bg-white rounded-xl border border-slate-200 shadow-2xs p-4 flex flex-col">
+            <div className="flex items-center justify-between pb-2 mb-3 border-b border-slate-100">
+              <div className="flex items-center gap-1.5">
+                <TerminalIcon className="w-4 h-4 text-blue-600" />
+                <span className="text-xs font-bold text-slate-900 uppercase tracking-wider">
+                  TEST CASE RESULTS
+                </span>
+              </div>
+
+              {execResult && (
+                <span className={`text-[11px] font-bold font-mono px-2 py-0.5 rounded ${
+                  execResult.success
+                    ? 'bg-emerald-50 text-emerald-700 border border-emerald-200'
+                    : 'bg-red-50 text-red-700 border border-red-200'
+                }`}>
+                  {execResult.success ? '✓ PASSED' : '✕ INCOMPLETE'}
+                </span>
+              )}
+            </div>
+
+            {/* Test Case Breakdown */}
+            {execResult ? (
+              <div className="space-y-2 mb-4">
+                {execResult.testCaseResults.map((tc, idx) => (
+                  <div
+                    key={tc.id || idx}
+                    className={`p-2.5 rounded-lg border text-xs flex items-center justify-between ${
+                      tc.passed
+                        ? 'bg-emerald-50/50 border-emerald-200 text-emerald-900'
+                        : 'bg-red-50/50 border-red-200 text-red-900'
+                    }`}
+                  >
+                    <div className="flex items-center gap-2">
+                      {tc.passed ? (
+                        <Check className="w-4 h-4 text-emerald-600 shrink-0 font-bold" />
+                      ) : (
+                        <X className="w-4 h-4 text-red-600 shrink-0 font-bold" />
+                      )}
+                      <span className="font-semibold">
+                        Test Case {idx + 1}
+                      </span>
+                    </div>
+
+                    <span className="font-mono text-[11px] font-bold">
+                      {tc.passed ? 'Passed' : 'Failed'}
+                    </span>
+                  </div>
+                ))}
+              </div>
+            ) : (
+              <div className="p-4 bg-slate-50 border border-slate-200 rounded-lg text-center text-xs text-slate-500 mb-4">
+                Click <strong>RUN</strong> to test against visible cases or <strong>SUBMIT</strong> to evaluate against regression assertions.
+              </div>
+            )}
+
+            {/* QUESTION SCORECARD (Requirements Spec 10) */}
+            <div className="pt-3 border-t border-slate-100 bg-slate-50/50 -mx-4 -mb-4 p-4 rounded-b-xl">
+              <span className="text-[10px] font-bold uppercase tracking-wider text-slate-400 block mb-2 font-mono">
+                QUESTION SCORECARD
+              </span>
+
+              <div className="grid grid-cols-2 gap-2 text-xs font-mono">
+                <div className="bg-white p-2 rounded border border-slate-200">
+                  <span className="text-[10px] text-slate-400 block font-sans">Current Question</span>
+                  <strong className="text-slate-900">Question {currentIdx + 1}</strong>
+                </div>
+
+                <div className="bg-white p-2 rounded border border-slate-200">
+                  <span className="text-[10px] text-slate-400 block font-sans">Tests Passed</span>
+                  <strong className="text-slate-900">{currentQuestionTestsPassed} / {currentQuestionTotalTests}</strong>
+                </div>
+
+                <div className="bg-white p-2 rounded border border-slate-200">
+                  <span className="text-[10px] text-slate-400 block font-sans">Question Score</span>
+                  <strong className="text-blue-700">{currentQuestionScore} / {currentQuestion.marks}</strong>
+                </div>
+
+                <div className="bg-white p-2 rounded border border-slate-200">
+                  <span className="text-[10px] text-slate-400 block font-sans">Round Score</span>
+                  <strong className="text-emerald-700">{currentRoundScore} / {round.totalMarks}</strong>
+                </div>
+              </div>
+            </div>
+          </div>
+
+          {/* ---------------------------------------------------- */}
+          {/* CARD 3: LIVE SCOREBOARD (Requirements Specs 11 & 12) */}
+          {/* ---------------------------------------------------- */}
+          <div className="bg-white rounded-xl border border-slate-200 shadow-2xs p-4 flex flex-col flex-1">
+            <div className="flex items-center justify-between pb-2 mb-3 border-b border-slate-100">
+              <div className="flex items-center gap-2">
+                <Trophy className="w-4 h-4 text-amber-500" />
+                <span className="text-xs font-bold text-slate-900 uppercase tracking-wider">
+                  LIVE SCOREBOARD
+                </span>
+              </div>
+
+              <div className="flex items-center gap-1.5 text-[10px] font-mono text-emerald-700 bg-emerald-50 px-2 py-0.5 rounded-full border border-emerald-200">
+                <span className="w-1.5 h-1.5 rounded-full bg-emerald-500 animate-pulse"></span>
+                <span>REAL-TIME</span>
+              </div>
+            </div>
+
+            {/* Scoreboard List - Strictly: Rank, Team Name, Score */}
+            <div className="overflow-hidden rounded-lg border border-slate-200 bg-white">
+              <table className="w-full text-left text-xs">
+                <thead className="bg-slate-50 border-b border-slate-200 text-slate-500 uppercase font-mono text-[10px]">
+                  <tr>
+                    <th className="py-2 px-3 w-12">Rank</th>
+                    <th className="py-2 px-3">Team Name</th>
+                    <th className="py-2 px-3 text-right">Score</th>
+                  </tr>
+                </thead>
+                <tbody className="divide-y divide-slate-100 font-mono">
+                  {scoreboard.map((entry) => (
+                    <tr
+                      key={entry.teamName}
+                      className={`transition-colors ${
+                        entry.isCurrentTeam
+                          ? 'bg-blue-50/80 font-bold text-blue-900 border-l-4 border-l-blue-600'
+                          : 'hover:bg-slate-50/60 text-slate-700'
+                      }`}
+                    >
+                      <td className="py-2.5 px-3">
+                        #{entry.rank}
+                      </td>
+                      <td className="py-2.5 px-3 truncate max-w-[140px] font-sans">
+                        <span className={entry.isCurrentTeam ? 'font-bold text-blue-950' : 'font-medium'}>
+                          {entry.teamName}
+                        </span>
+                        {entry.isCurrentTeam && (
+                          <span className="ml-1.5 text-[9px] font-bold text-blue-600 bg-blue-100 px-1 py-0.2 rounded uppercase font-mono">
+                            YOU
+                          </span>
+                        )}
+                      </td>
+                      <td className="py-2.5 px-3 text-right font-bold tabular-nums">
+                        {entry.score}
+                      </td>
+                    </tr>
+                  ))}
+                </tbody>
+              </table>
+            </div>
+
+            <span className="text-[10px] text-slate-400 mt-2 block text-center font-mono">
+              Auto-updating live competition ranking
+            </span>
+          </div>
+
+        </div>
+
+      </div>
+
+      {/* Complete Round Confirmation Modal */}
+      {showSubmitRoundConfirm && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-slate-900/60 backdrop-blur-xs">
+          <div className="bg-white rounded-xl max-w-sm w-full p-6 shadow-2xl border border-slate-200 text-center animate-in zoom-in-95 duration-150">
+            <Trophy className="w-10 h-10 text-amber-500 mx-auto mb-3" />
+            <h3 className="text-base font-bold text-slate-900 mb-1">
+              Complete {round.title}?
+            </h3>
+            <p className="text-xs text-slate-600 leading-relaxed mb-5">
+              You have solved <strong>{solvedCount} of {questions.length}</strong> questions in this round. Submitting will finalize your round score and open the round scorecard.
+            </p>
+
+            <div className="flex items-center justify-center gap-3">
+              <button
+                onClick={() => setShowSubmitRoundConfirm(false)}
+                className="px-4 py-2 border border-slate-300 text-slate-700 text-xs font-semibold rounded-lg hover:bg-slate-50 transition-colors"
+              >
+                Keep Debugging
+              </button>
+              <button
+                onClick={() => {
+                  setShowSubmitRoundConfirm(false);
+                  onCompleteRound();
+                }}
+                className="px-4 py-2 bg-blue-600 hover:bg-blue-700 text-white text-xs font-bold rounded-lg transition-colors shadow-2xs"
+              >
+                Submit & Complete Round
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
+
+    </div>
+  );
+};

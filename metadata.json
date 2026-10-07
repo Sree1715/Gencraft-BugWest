@@ -1,0 +1,6 @@
+{
+  "name": "GENCRAFT — BUG FEST",
+  "description": "Find the Bug. Fix the Code. Prove Your Logic. Professional college technical debugging competition platform for C and Python.",
+  "requestFramePermissions": [],
+  "majorCapabilities": ["MAJOR_CAPABILITY_SERVER_SIDE_GEMINI_API"]
+}
