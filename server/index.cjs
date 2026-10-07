@@ -150,18 +150,33 @@ app.post('/api/rounds/verify-code', (req, res) => {
       teamRound = db.prepare('SELECT * FROM team_rounds WHERE team_id = ? AND round_id = ?').get(team.id, round.id);
     }
 
+      const ROUND_META = {
+        1: { subtitle: 'Basic Debugging', description: 'Find basic syntax flaws, uninitialized variables, indentation errors, and simple logic bugs in C & Python.', totalMarks: 100, allowedLanguage: 'all' },
+        2: { subtitle: 'Core Programming & Debugging', description: 'Pointers, dynamic memory, structs, list references, recursion, custom exceptions, and algorithms.', totalMarks: 100, allowedLanguage: 'all' },
+        3: { subtitle: 'Advanced Professional Debugging', description: 'Double free, dangling pointers, MRO diamond inheritance, underflow partitioning, and memory corruption.', totalMarks: 100, allowedLanguage: 'all' }
+      };
+      const meta = ROUND_META[round.round_number] || { subtitle: '', description: '', totalMarks: 100, allowedLanguage: 'all' };
+      const qCount = db.prepare('SELECT COUNT(*) as cnt FROM questions WHERE round = ?').get(round.round_number).cnt;
+
     return res.json({
       success: true,
       round: {
         roundId: round.id,
         roundNumber: round.round_number,
         title: round.round_name,
+        subtitle: meta.subtitle,
+        description: meta.description,
         joinCode: round.join_code,
+        bugfestCode: round.join_code,
         durationMinutes: round.duration_minutes,
+        totalMarks: meta.totalMarks,
+        questionCount: qCount,
+        allowedLanguage: meta.allowedLanguage,
         status: round.status,
         startTime: round.start_time,
         endTime: round.end_time
       },
+
       teamRound: teamRound ? {
         id: teamRound.id,
         teamId: teamRound.team_id,
@@ -197,12 +212,26 @@ app.get('/api/rounds', (req, res) => {
         WHERE round_id = ?
       `).get(r.id);
 
+      const ROUND_META = {
+        1: { subtitle: 'Basic Debugging', description: 'Find basic syntax flaws, uninitialized variables, indentation errors, and simple logic bugs in C & Python.', totalMarks: 100, allowedLanguage: 'all' },
+        2: { subtitle: 'Core Programming & Debugging', description: 'Pointers, dynamic memory, structs, list references, recursion, custom exceptions, and algorithms.', totalMarks: 100, allowedLanguage: 'all' },
+        3: { subtitle: 'Advanced Professional Debugging', description: 'Double free, dangling pointers, MRO diamond inheritance, underflow partitioning, and memory corruption.', totalMarks: 100, allowedLanguage: 'all' }
+      };
+      const meta = ROUND_META[r.round_number] || { subtitle: '', description: '', totalMarks: 100, allowedLanguage: 'all' };
+      const qCount = db.prepare('SELECT COUNT(*) as cnt FROM questions WHERE round = ?').get(r.round_number).cnt;
+
       return {
         roundId: r.id,
         roundNumber: r.round_number,
         title: r.round_name,
+        subtitle: meta.subtitle,
+        description: meta.description,
         joinCode: r.join_code,
+        bugfestCode: r.join_code,
         durationMinutes: r.duration_minutes,
+        totalMarks: meta.totalMarks,
+        questionCount: qCount,
+        allowedLanguage: meta.allowedLanguage,
         status: r.status,
         startTime: r.start_time,
         endTime: r.end_time,
@@ -212,6 +241,7 @@ app.get('/api/rounds', (req, res) => {
         avgScore: Math.round(stats.avgScore || 0)
       };
     });
+
 
     res.json({ rounds: formatted, serverTime: new Date().toISOString() });
   } catch (err) {
@@ -497,12 +527,27 @@ app.get('/api/organizer/data', (req, res) => {
         WHERE round_id = ?
       `).get(r.id);
 
+      // Static metadata matching frontend DEFAULT_ROUNDS
+      const ROUND_META = {
+        1: { subtitle: 'Basic Debugging', description: 'Find basic syntax flaws, uninitialized variables, indentation errors, and simple logic bugs in C & Python.', totalMarks: 100, allowedLanguage: 'all' },
+        2: { subtitle: 'Core Programming & Debugging', description: 'Pointers, dynamic memory, structs, list references, recursion, custom exceptions, and algorithms.', totalMarks: 100, allowedLanguage: 'all' },
+        3: { subtitle: 'Advanced Professional Debugging', description: 'Double free, dangling pointers, MRO diamond inheritance, underflow partitioning, and memory corruption.', totalMarks: 100, allowedLanguage: 'all' }
+      };
+      const meta = ROUND_META[r.round_number] || { subtitle: '', description: '', totalMarks: 100, allowedLanguage: 'all' };
+      const qCount = db.prepare('SELECT COUNT(*) as cnt FROM questions WHERE round = ?').get(r.round_number).cnt;
+
       return {
         roundId: r.id,
         roundNumber: r.round_number,
         title: r.round_name,
+        subtitle: meta.subtitle,
+        description: meta.description,
         joinCode: r.join_code,
+        bugfestCode: r.join_code,
         durationMinutes: r.duration_minutes,
+        totalMarks: meta.totalMarks,
+        questionCount: qCount,
+        allowedLanguage: meta.allowedLanguage,
         status: r.status,
         startTime: r.start_time,
         endTime: r.end_time,
@@ -512,6 +557,7 @@ app.get('/api/organizer/data', (req, res) => {
         avgScore: Math.round(stats.avgScore || 0)
       };
     });
+
 
     const formattedQuestions = questions.map(q => ({
       id: q.id,
@@ -559,16 +605,28 @@ app.get('/api/organizer/data', (req, res) => {
 
       const totalScore = roundScores[1] + roundScores[2] + roundScores[3];
 
+      // Determine current round: highest round that is not yet completed, min 1
+      let currentRound = 1;
+      if (roundCompleted[1] && !roundCompleted[2]) currentRound = 2;
+      else if (roundCompleted[1] && roundCompleted[2]) currentRound = 3;
+
+      const allDone = roundCompleted[1] && roundCompleted[2] && roundCompleted[3];
+
       return {
         userId: team.id,
         teamName: team.team_name,
+        name: team.team_name,
         locked: Boolean(team.locked),
         createdAt: team.created_at,
-        currentRound: 1,
-        status: 'Active',
+        currentRound,
+        status: allDone ? 'Completed' : 'Active',
         totalScore,
         roundScores,
         roundCompleted,
+        codeDrafts: {},
+        visitedQuestions: [],
+        timeRemainingSeconds: { 1: 20 * 60, 2: 25 * 60, 3: 30 * 60 },
+        lastActive: 'Live',
         submissions: submissionsObj
       };
     });
@@ -584,6 +642,20 @@ app.get('/api/organizer/data', (req, res) => {
     res.status(500).json({ error: 'Failed to fetch organizer data.' });
   }
 });
+
+// ----------------------------------------------------
+// PRODUCTION: Serve Vite-built frontend from dist/
+// In dev, Vite dev server handles the frontend.
+// ----------------------------------------------------
+if (process.env.NODE_ENV === 'production') {
+  const path = require('path');
+  const distPath = path.join(__dirname, '..', 'dist');
+  app.use(express.static(distPath));
+  // SPA fallback — all non-API routes serve index.html
+  app.get('*', (req, res) => {
+    res.sendFile(path.join(distPath, 'index.html'));
+  });
+}
 
 // Start Express server
 app.listen(PORT, '0.0.0.0', () => {

@@ -130,8 +130,11 @@ export interface RoundConfig {
   questionCount: number;
   status: RoundStatus;
   allowedLanguage: 'all' | 'c' | 'python';
+  joinCode?: string;
   bugfestCode?: string;
   bugfestCodeGeneratedAt?: string;
+  startTime?: string;
+  endTime?: string;
 }
 
 export interface LeaderboardEntry {

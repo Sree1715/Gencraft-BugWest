@@ -166,11 +166,38 @@ export const competitionStore = {
         const data = await apiClient.fetchOrganizerData();
         if (data) {
           if (data.rounds && data.rounds.length > 0) {
-            cachedRounds = data.rounds;
+            // Map backend joinCode -> bugfestCode and merge with existing cached rounds
+            // to preserve any locally generated bugfestCode values
+            cachedRounds = data.rounds.map((incoming: RoundConfig) => {
+              const existing = cachedRounds.find((r) => r.roundId === incoming.roundId);
+              const resolvedBugfestCode =
+                incoming.joinCode || incoming.bugfestCode || existing?.bugfestCode;
+              return {
+                ...(existing || {}),
+                ...incoming,
+                bugfestCode: resolvedBugfestCode,
+                joinCode: incoming.joinCode
+              };
+            });
           }
           if (data.questions && data.questions.length > 0) {
-            cachedQuestions = data.questions;
+            // Backend questions only have `testCases` (flat). Merge with INITIAL_QUESTIONS
+            // to preserve visibleTestCases / hiddenTestCases the frontend needs.
+            cachedQuestions = data.questions.map((bq: any) => {
+              const local = INITIAL_QUESTIONS.find((q) => q.id === bq.id);
+              const testCases = bq.testCases || (local ? [...(local.visibleTestCases || []), ...(local.hiddenTestCases || [])] : []);
+              const visibleTestCases = local?.visibleTestCases ?? testCases.slice(0, 2);
+              const hiddenTestCases = local?.hiddenTestCases ?? testCases.slice(2);
+              return {
+                ...(local || {}),
+                ...bq,
+                visibleTestCases,
+                hiddenTestCases,
+                testCases
+              };
+            });
           }
+
           if (data.participants) {
             const pMap: Record<string, ParticipantSession> = {};
             data.participants.forEach((p) => {
@@ -261,11 +288,35 @@ export const competitionStore = {
     return active || this.getRounds()[0];
   },
 
+  /**
+   * Generates a new random Bugfest round access code.
+   * Format: BF-R{roundId}-XXXXXX (6 uppercase alphanumeric chars)
+   */
+  generateOrRegenerateRoundCode(roundId: number): string {
+    const chars = 'ABCDEFGHJKLMNPQRSTUVWXYZ23456789';
+    let rand = '';
+    for (let i = 0; i < 6; i++) {
+      rand += chars[Math.floor(Math.random() * chars.length)];
+    }
+    return `BF-R${roundId}-${rand}`;
+  },
+
   async updateRound(roundId: 1 | 2 | 3, updates: Partial<RoundConfig>) {
+    // Map bugfestCode -> joinCode for the backend PATCH endpoint
+    const payload: any = { ...updates };
+    if (payload.bugfestCode !== undefined) {
+      payload.joinCode = payload.bugfestCode;
+      delete payload.bugfestCode;
+    }
     // Send to backend DB
-    const res = await apiClient.updateRound(roundId, updates);
+    const res = await apiClient.updateRound(roundId, payload);
     if (res.success && res.round) {
-      cachedRounds = cachedRounds.map((r) => (r.roundId === roundId ? { ...r, ...res.round } : r));
+      // Merge the updated round, preserving bugfestCode from updates
+      cachedRounds = cachedRounds.map((r) =>
+        r.roundId === roundId
+          ? { ...r, ...res.round, bugfestCode: updates.bugfestCode ?? res.round.bugfestCode ?? r.bugfestCode }
+          : r
+      );
       emitter.notify();
     }
   },

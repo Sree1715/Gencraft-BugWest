@@ -1,0 +1,57 @@
+version: "3.8"
+
+x-common: &common
+  restart: unless-stopped
+  logging:
+    driver: json-file
+    options: { max-size: "10m", max-file: "3" }
+
+services:
+
+  # ── Init: creates data dir and sets ownership before app starts ──────────────
+  init:
+    image: alpine:3.20
+    restart: "no"
+    volumes:
+      - ${DATA_ROOT:-/opt/docker-data}/${STACK_NAME:-bugwest}/data:/data
+    command: >
+      sh -c "mkdir -p /data &&
+             chown -R 1000:1000 /data &&
+             echo '[init] data directory ready'"
+
+  # ── App: Express API + React SPA (single container) ─────────────────────────
+  app:
+    <<: *common
+    build:
+      context: .
+      dockerfile: Dockerfile
+    image: bugwest:${IMAGE_TAG:-latest}
+    container_name: ${STACK_NAME:-bugwest}-app
+    environment:
+      NODE_ENV: production
+      PORT: "3001"
+      DB_PATH: /data/bugwest.db
+      GEMINI_API_KEY: ${GEMINI_API_KEY:?Set GEMINI_API_KEY in Portainer Environment panel}
+      APP_URL: ${APP_URL:-http://localhost:3001}
+    volumes:
+      # SQLite database — survives redeploys
+      - ${DATA_ROOT:-/opt/docker-data}/${STACK_NAME:-bugwest}/data:/data
+    ports:
+      # Change host port if 3001 is taken; internal port stays 3001
+      - "${BIND_ADDRESS:-0.0.0.0}:${HOST_PORT:-3001}:3001"
+    depends_on:
+      init:
+        condition: service_completed_successfully
+    healthcheck:
+      test: ["CMD-SHELL", "wget -qO- http://127.0.0.1:3001/api/health || exit 1"]
+      interval: 30s
+      timeout: 5s
+      retries: 3
+      start_period: 30s
+    networks:
+      - proxy   # for Nginx Proxy Manager / Traefik
+
+networks:
+  proxy:
+    external: true
+    name: ${PROXY_NETWORK:-npm_default}

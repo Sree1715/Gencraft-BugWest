@@ -60,10 +60,11 @@ export default function App() {
   };
 
   const handleLoginSuccess = (user: User) => {
-    store.login(user.userId);
     if (user.role === 'organizer') {
+      store.loginByCodeOrId(user.userId);
       setActiveView('organizer-dashboard');
     } else {
+      // Participant session already set by loginParticipantWithTeamCode - just redirect
       setActiveView('participant-dashboard');
     }
   };

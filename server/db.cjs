@@ -2,8 +2,11 @@ const Database = require('better-sqlite3');
 const path = require('path');
 const INITIAL_QUESTIONS = require('./questionsData.json');
 
-const dbPath = path.join(__dirname, '..', 'bugwest.db');
+// DB_PATH env var lets Docker point the database at the mounted volume (/data/bugwest.db).
+// Falls back to the repo-local path for local development.
+const dbPath = process.env.DB_PATH || path.join(__dirname, '..', 'bugwest.db');
 const db = new Database(dbPath);
+
 
 // Enable WAL mode for high concurrency
 db.pragma('journal_mode = WAL');
