@@ -10,6 +10,7 @@ import {
   RoundLeaderboardFilter 
 } from '../../types';
 import { competitionStore } from '../../store/competitionStore';
+import { exportToExcel, exportToPDF } from '../../utils/exportUtils';
 import { QuestionModal } from './QuestionModal';
 import { SubmissionInspectorModal } from './SubmissionInspectorModal';
 import { ParticipantDetailModal } from './ParticipantDetailModal';
@@ -1152,15 +1153,33 @@ export const OrganizerDashboard: React.FC<OrganizerDashboardProps> = ({
                 </h1>
               </div>
 
-              <div className="flex items-center gap-3 p-2 bg-white border border-slate-200 rounded-lg text-xs">
-                <span className="font-semibold text-slate-700">Public Visibility:</span>
+              <div className="flex items-center gap-3">
+                <div className="flex items-center gap-3 p-2 bg-white border border-slate-200 rounded-lg text-xs">
+                  <span className="font-semibold text-slate-700">Public Visibility:</span>
+                  <button
+                    onClick={() => onToggleLeaderboard(!isLeaderboardPublic)}
+                    className={`px-3 py-1 rounded font-bold transition-colors ${
+                      isLeaderboardPublic ? 'bg-emerald-600 text-white' : 'bg-slate-300 text-slate-700'
+                    }`}
+                  >
+                    {isLeaderboardPublic ? 'Enabled (Public)' : 'Disabled (Hidden from Candidates)'}
+                  </button>
+                </div>
+                
                 <button
-                  onClick={() => onToggleLeaderboard(!isLeaderboardPublic)}
-                  className={`px-3 py-1 rounded font-bold transition-colors ${
-                    isLeaderboardPublic ? 'bg-emerald-600 text-white' : 'bg-slate-300 text-slate-700'
-                  }`}
+                  onClick={() => exportToPDF(leaderboard)}
+                  className="flex items-center gap-2 px-4 py-2 bg-red-600 hover:bg-red-700 text-white text-xs font-bold rounded-lg transition-colors shadow-sm"
                 >
-                  {isLeaderboardPublic ? 'Enabled (Public)' : 'Disabled (Hidden from Candidates)'}
+                  <Download className="w-4 h-4" />
+                  Export PDF
+                </button>
+
+                <button
+                  onClick={() => exportToExcel(leaderboard)}
+                  className="flex items-center gap-2 px-4 py-2 bg-green-600 hover:bg-green-700 text-white text-xs font-bold rounded-lg transition-colors shadow-sm"
+                >
+                  <Download className="w-4 h-4" />
+                  Export Excel
                 </button>
               </div>
             </div>
