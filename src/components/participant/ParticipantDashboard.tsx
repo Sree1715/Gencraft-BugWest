@@ -167,7 +167,7 @@ export const ParticipantDashboard: React.FC<ParticipantDashboardProps> = ({
                 Basic Debugging
               </h3>
               <p className="text-xs text-slate-500 mb-4 font-mono">
-                20 Questions · 20 Minutes · 100 Marks · Easy
+                10 Questions · 20 Minutes · 50 Marks · Beginner
               </p>
 
               {/* Explicit Topics Specified in Requirements */}
@@ -178,39 +178,23 @@ export const ParticipantDashboard: React.FC<ParticipantDashboardProps> = ({
                 <ul className="space-y-1.5 text-xs text-slate-600">
                   <li className="flex items-center gap-2">
                     <CheckCircle2 className="w-3.5 h-3.5 text-blue-600 shrink-0" />
-                    <span>C basics & syntax rules</span>
+                    <span>Simple syntax & indentation errors</span>
                   </li>
                   <li className="flex items-center gap-2">
                     <CheckCircle2 className="w-3.5 h-3.5 text-blue-600 shrink-0" />
-                    <span>Python basics & runtime model</span>
+                    <span>Incorrect variable usage & scoping</span>
                   </li>
                   <li className="flex items-center gap-2">
                     <CheckCircle2 className="w-3.5 h-3.5 text-blue-600 shrink-0" />
-                    <span>For and While loops execution bugs</span>
+                    <span>Basic logic mistakes (+ vs -)</span>
                   </li>
                   <li className="flex items-center gap-2">
                     <CheckCircle2 className="w-3.5 h-3.5 text-blue-600 shrink-0" />
-                    <span>Conditions, if/else precedence</span>
+                    <span>Simple conditions & flipped signs</span>
                   </li>
                   <li className="flex items-center gap-2">
                     <CheckCircle2 className="w-3.5 h-3.5 text-blue-600 shrink-0" />
-                    <span>Python indentation (tab/spaces)</span>
-                  </li>
-                  <li className="flex items-center gap-2">
-                    <CheckCircle2 className="w-3.5 h-3.5 text-blue-600 shrink-0" />
-                    <span>Missing semicolons & unclosed tokens</span>
-                  </li>
-                  <li className="flex items-center gap-2">
-                    <CheckCircle2 className="w-3.5 h-3.5 text-blue-600 shrink-0" />
-                    <span>Basic arrays (C) and lists (Python)</span>
-                  </li>
-                  <li className="flex items-center gap-2">
-                    <CheckCircle2 className="w-3.5 h-3.5 text-blue-600 shrink-0" />
-                    <span>Basic function call & return flaws</span>
-                  </li>
-                  <li className="flex items-center gap-2">
-                    <CheckCircle2 className="w-3.5 h-3.5 text-blue-600 shrink-0" />
-                    <span>Simple logical errors & edge cases</span>
+                    <span>For and While loop bounds</span>
                   </li>
                 </ul>
               </div>
@@ -255,47 +239,33 @@ export const ParticipantDashboard: React.FC<ParticipantDashboardProps> = ({
                 Core Programming & Debugging
               </h3>
               <p className="text-xs text-slate-500 mb-4 font-mono">
-                10 Questions · 25 Minutes · 100 Marks · Medium
+                5 Questions · 25 Minutes · 50 Marks · Intermediate
               </p>
 
               {/* Explicit Topics Specified in Requirements */}
               <div className="border-t border-slate-100 pt-4 space-y-3">
                 <div>
                   <span className="text-[11px] font-bold text-indigo-700 uppercase tracking-wider block mb-1">
-                    C Domains:
+                    Tested Concepts:
                   </span>
-                  <div className="flex flex-wrap gap-1 text-[11px] font-mono text-slate-600">
-                    <span className="bg-slate-100 px-2 py-0.5 rounded">functions</span>
-                    <span className="bg-slate-100 px-2 py-0.5 rounded">arrays</span>
-                    <span className="bg-slate-100 px-2 py-0.5 rounded">strings</span>
-                    <span className="bg-slate-100 px-2 py-0.5 rounded">pointers</span>
-                    <span className="bg-slate-100 px-2 py-0.5 rounded">structs</span>
-                    <span className="bg-slate-100 px-2 py-0.5 rounded">recursion</span>
-                    <span className="bg-slate-100 px-2 py-0.5 rounded">dynamic memory</span>
-                    <span className="bg-slate-100 px-2 py-0.5 rounded">file handling</span>
-                    <span className="bg-slate-100 px-2 py-0.5 rounded">searching</span>
-                    <span className="bg-slate-100 px-2 py-0.5 rounded">sorting</span>
-                    <span className="bg-slate-100 px-2 py-0.5 rounded">linked lists</span>
-                    <span className="bg-slate-100 px-2 py-0.5 rounded">runtime & logical errors</span>
-                  </div>
-                </div>
-
-                <div>
-                  <span className="text-[11px] font-bold text-amber-700 uppercase tracking-wider block mb-1">
-                    Python Domains:
-                  </span>
-                  <div className="flex flex-wrap gap-1 text-[11px] font-mono text-slate-600">
-                    <span className="bg-slate-100 px-2 py-0.5 rounded">functions</span>
-                    <span className="bg-slate-100 px-2 py-0.5 rounded">lists</span>
-                    <span className="bg-slate-100 px-2 py-0.5 rounded">dictionaries</span>
-                    <span className="bg-slate-100 px-2 py-0.5 rounded">sets & tuples</span>
-                    <span className="bg-slate-100 px-2 py-0.5 rounded">classes/OOP</span>
-                    <span className="bg-slate-100 px-2 py-0.5 rounded">exceptions</span>
-                    <span className="bg-slate-100 px-2 py-0.5 rounded">recursion</span>
-                    <span className="bg-slate-100 px-2 py-0.5 rounded">file handling</span>
-                    <span className="bg-slate-100 px-2 py-0.5 rounded">algorithms</span>
-                    <span className="bg-slate-100 px-2 py-0.5 rounded">string processing</span>
-                  </div>
+                  <ul className="space-y-1.5 text-xs text-slate-600">
+                    <li className="flex items-center gap-2">
+                      <CheckCircle2 className="w-3.5 h-3.5 text-indigo-600 shrink-0" />
+                      <span>For loop debugging (wrong increments)</span>
+                    </li>
+                    <li className="flex items-center gap-2">
+                      <CheckCircle2 className="w-3.5 h-3.5 text-indigo-600 shrink-0" />
+                      <span>Function debugging (missing returns)</span>
+                    </li>
+                    <li className="flex items-center gap-2">
+                      <CheckCircle2 className="w-3.5 h-3.5 text-indigo-600 shrink-0" />
+                      <span>If/Else conditional debugging</span>
+                    </li>
+                    <li className="flex items-center gap-2">
+                      <CheckCircle2 className="w-3.5 h-3.5 text-indigo-600 shrink-0" />
+                      <span>1-2 line basic code writing tasks</span>
+                    </li>
+                  </ul>
                 </div>
               </div>
             </div>
