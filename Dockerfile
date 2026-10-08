@@ -3,8 +3,8 @@ FROM node:20-alpine AS builder
 WORKDIR /build
 
 # Install deps first (layer-cached unless package.json changes)
-COPY package.json package-lock.json ./
-RUN npm ci
+COPY package*.json .npmrc* ./
+RUN npm ci || npm install --legacy-peer-deps
 
 # Copy source and build
 COPY . .
@@ -19,8 +19,8 @@ ENV NODE_ENV=production
 ENV PORT=3001
 
 # Install only production dependencies
-COPY package.json package-lock.json ./
-RUN npm ci --omit=dev && npm cache clean --force
+COPY package*.json .npmrc* ./
+RUN (npm ci --omit=dev || npm install --omit=dev --legacy-peer-deps) && npm cache clean --force
 
 # Copy server source
 COPY server/ ./server/
