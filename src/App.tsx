@@ -97,15 +97,8 @@ export default function App() {
     setIsRoundResultModalOpen(false);
     if (!completedRoundConfig) return;
 
-    if (completedRoundConfig.roundId === 3) {
-      // Show Final Scorecard after round 3
-      setActiveView('final-scorecard');
-    } else {
-      // Proceed to next round
-      const nextRoundId = (completedRoundConfig.roundId + 1) as 1 | 2 | 3;
-      setActiveRoundId(nextRoundId);
-      setActiveView('coding-arena');
-    }
+    // Show Final Scorecard after completing the round
+    setActiveView('final-scorecard');
   };
 
   return (

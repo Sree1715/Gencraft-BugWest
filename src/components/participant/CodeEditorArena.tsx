@@ -30,7 +30,8 @@ import {
   Zap,
   Radio,
   Check,
-  X
+  X,
+  Loader2
 } from 'lucide-react';
 
 interface CodeEditorArenaProps {
@@ -193,7 +194,18 @@ export const CodeEditorArena: React.FC<CodeEditorArenaProps> = ({
 
       onSubmitQuestion(sub);
       setIsSubmitting(false);
-      setSubmissionFeedback(`Submitted! Scored ${result.marksEarned} / ${currentQuestion.marks} marks.`);
+
+      if (currentIdx < questions.length - 1) {
+        setSubmissionFeedback(`Submitted! Opening Question ${currentIdx + 2}...`);
+        setTimeout(() => {
+          setCurrentIdx(currentIdx + 1);
+          setSubmissionFeedback(null);
+          setExecResult(null);
+        }, 500);
+      } else {
+        setSubmissionFeedback(`Final Question Submitted! Scored ${result.marksEarned} / ${currentQuestion.marks}. Click 'Complete Round' when ready.`);
+      }
+
       if (window.innerWidth < 1024) setMobileTab('results');
     }, 250);
   };
@@ -337,7 +349,7 @@ export const CodeEditorArena: React.FC<CodeEditorArenaProps> = ({
         >
           {/* Problem Statement Card */}
           <div className="bg-white rounded-xl border border-slate-200 shadow-2xs p-4">
-            <div className="flex items-center justify-between pb-2.5 mb-2.5 border-b border-slate-100 gap-2">
+            <div className="flex items-center justify-between gap-2">
               <div>
                 <span className="text-[10px] font-bold text-blue-600 font-mono uppercase tracking-wider block">
                   Question {currentIdx + 1} of {questions.length}
@@ -354,18 +366,6 @@ export const CodeEditorArena: React.FC<CodeEditorArenaProps> = ({
                 <span className="px-2 py-0.5 bg-blue-50 text-blue-700 text-xs font-mono font-bold uppercase rounded border border-blue-200">
                   {currentQuestion.language}
                 </span>
-              </div>
-            </div>
-
-            <p className="text-xs text-slate-600 leading-relaxed mb-2.5">
-              {currentQuestion.description}
-            </p>
-
-            <div className="p-2.5 bg-amber-50/80 border border-amber-200/90 rounded-lg text-xs text-amber-950 flex items-start gap-2">
-              <AlertCircle className="w-3.5 h-3.5 text-amber-600 shrink-0 mt-0.5" />
-              <div>
-                <strong className="font-semibold mr-1">Bug Vector:</strong>
-                <span>{currentQuestion.bugDescription}</span>
               </div>
             </div>
           </div>
@@ -550,31 +550,55 @@ export const CodeEditorArena: React.FC<CodeEditorArenaProps> = ({
             </div>
 
             {/* Test Case Breakdown */}
-            {execResult ? (
-              <div className="space-y-1.5 mb-3 max-h-36 overflow-y-auto">
+            {isRunning ? (
+              <div className="p-4 bg-blue-50/50 border border-blue-200 rounded-lg flex items-center justify-center gap-2 text-xs font-medium text-blue-700 mb-3 animate-pulse">
+                <Loader2 className="w-4 h-4 animate-spin text-blue-600" />
+                Executing code and verifying test cases...
+              </div>
+            ) : execResult ? (
+              <div className="space-y-2 mb-3 max-h-56 overflow-y-auto pr-1">
                 {execResult.testCaseResults.map((tc, idx) => (
                   <div
                     key={tc.id || idx}
-                    className={`p-2 rounded-lg border text-xs flex items-center justify-between ${
+                    className={`p-2.5 rounded-lg border text-xs ${
                       tc.passed
-                        ? 'bg-emerald-50/50 border-emerald-200 text-emerald-900'
-                        : 'bg-red-50/50 border-red-200 text-red-900'
+                        ? 'bg-emerald-50/50 border-emerald-200 text-emerald-950'
+                        : 'bg-red-50/50 border-red-200 text-red-950'
                     }`}
                   >
-                    <div className="flex items-center gap-2">
-                      {tc.passed ? (
-                        <Check className="w-3.5 h-3.5 text-emerald-600 shrink-0 font-bold" />
-                      ) : (
-                        <X className="w-3.5 h-3.5 text-red-600 shrink-0 font-bold" />
-                      )}
-                      <span className="font-semibold text-xs">
-                        Test Case {idx + 1}
+                    <div className="flex items-center justify-between font-semibold mb-1.5">
+                      <div className="flex items-center gap-1.5">
+                        {tc.passed ? (
+                          <Check className="w-3.5 h-3.5 text-emerald-600 shrink-0 font-bold" />
+                        ) : (
+                          <X className="w-3.5 h-3.5 text-red-600 shrink-0 font-bold" />
+                        )}
+                        <span>Test Case {idx + 1}</span>
+                      </div>
+                      <span className={`font-mono text-[10px] font-bold px-1.5 py-0.5 rounded ${
+                        tc.passed ? 'bg-emerald-100 text-emerald-800' : 'bg-red-100 text-red-800'
+                      }`}>
+                        {tc.passed ? 'Passed' : 'Failed'}
                       </span>
                     </div>
 
-                    <span className="font-mono text-[10px] font-bold">
-                      {tc.passed ? 'Passed' : 'Failed'}
-                    </span>
+                    <div className="grid grid-cols-2 gap-1.5 font-mono text-[11px] mt-1 pt-1 border-t border-slate-200/60">
+                      <div className="bg-white/80 p-1.5 rounded border border-slate-200">
+                        <span className="text-[9px] uppercase tracking-wider text-slate-400 font-sans block">Expected:</span>
+                        <div className="text-slate-800 whitespace-pre-wrap truncate">{tc.expectedOutput || '(none)'}</div>
+                      </div>
+                      <div className="bg-white/80 p-1.5 rounded border border-slate-200">
+                        <span className="text-[9px] uppercase tracking-wider text-slate-400 font-sans block">Actual Output:</span>
+                        <div className={`whitespace-pre-wrap truncate font-semibold ${tc.passed ? 'text-emerald-700' : 'text-red-600'}`}>
+                          {tc.actualOutput || (tc.error ? 'Runtime Error' : '(no output)')}
+                        </div>
+                      </div>
+                    </div>
+                    {tc.error && (
+                      <div className="mt-1 text-[10px] text-red-600 font-mono bg-red-100/50 p-1 rounded">
+                        {tc.error}
+                      </div>
+                    )}
                   </div>
                 ))}
               </div>

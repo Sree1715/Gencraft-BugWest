@@ -151,12 +151,11 @@ app.post('/api/rounds/verify-code', (req, res) => {
     }
 
       const ROUND_META = {
-        1: { subtitle: 'Basic Debugging', description: 'Find basic syntax flaws, uninitialized variables, indentation errors, and simple logic bugs in C & Python.', totalMarks: 100, allowedLanguage: 'all' },
-        2: { subtitle: 'Core Programming & Debugging', description: 'Pointers, dynamic memory, structs, list references, recursion, custom exceptions, and algorithms.', totalMarks: 100, allowedLanguage: 'all' },
-        3: { subtitle: 'Advanced Professional Debugging', description: 'Double free, dangling pointers, MRO diamond inheritance, underflow partitioning, and memory corruption.', totalMarks: 100, allowedLanguage: 'all' }
+        1: { subtitle: 'BugFest Technical Arena', description: 'Core syntax, logic flaws, pointers, data structures, and algorithms in C & Python.', totalMarks: 35, allowedLanguage: 'all' }
       };
-      const meta = ROUND_META[round.round_number] || { subtitle: '', description: '', totalMarks: 100, allowedLanguage: 'all' };
-      const qCount = db.prepare('SELECT COUNT(*) as cnt FROM questions WHERE round = ?').get(round.round_number).cnt;
+      const meta = ROUND_META[round.round_number] || { subtitle: '', description: '', totalMarks: 35, allowedLanguage: 'all' };
+      const qCount = db.prepare('SELECT COUNT(*) as cnt FROM questions WHERE round = ?').get(round.round_number)?.cnt || 7;
+      const effectiveTotalMarks = round.total_marks || meta.totalMarks || 35;
 
     return res.json({
       success: true,
@@ -169,7 +168,7 @@ app.post('/api/rounds/verify-code', (req, res) => {
         joinCode: round.join_code,
         bugfestCode: round.join_code,
         durationMinutes: round.duration_minutes,
-        totalMarks: meta.totalMarks,
+        totalMarks: effectiveTotalMarks,
         questionCount: qCount,
         allowedLanguage: meta.allowedLanguage,
         status: round.status,
@@ -213,12 +212,11 @@ app.get('/api/rounds', (req, res) => {
       `).get(r.id);
 
       const ROUND_META = {
-        1: { subtitle: 'Basic Debugging', description: 'Find basic syntax flaws, uninitialized variables, indentation errors, and simple logic bugs in C & Python.', totalMarks: 100, allowedLanguage: 'all' },
-        2: { subtitle: 'Core Programming & Debugging', description: 'Pointers, dynamic memory, structs, list references, recursion, custom exceptions, and algorithms.', totalMarks: 100, allowedLanguage: 'all' },
-        3: { subtitle: 'Advanced Professional Debugging', description: 'Double free, dangling pointers, MRO diamond inheritance, underflow partitioning, and memory corruption.', totalMarks: 100, allowedLanguage: 'all' }
+        1: { subtitle: 'BugFest Technical Arena', description: 'Core syntax, logic flaws, pointers, data structures, and algorithms in C & Python.', totalMarks: 35, allowedLanguage: 'all' }
       };
-      const meta = ROUND_META[r.round_number] || { subtitle: '', description: '', totalMarks: 100, allowedLanguage: 'all' };
-      const qCount = db.prepare('SELECT COUNT(*) as cnt FROM questions WHERE round = ?').get(r.round_number).cnt;
+      const meta = ROUND_META[r.round_number] || { subtitle: '', description: '', totalMarks: 35, allowedLanguage: 'all' };
+      const qCount = db.prepare('SELECT COUNT(*) as cnt FROM questions WHERE round = ?').get(r.round_number)?.cnt || 7;
+      const effectiveTotalMarks = r.total_marks || meta.totalMarks || 35;
 
       return {
         roundId: r.id,
@@ -229,7 +227,7 @@ app.get('/api/rounds', (req, res) => {
         joinCode: r.join_code,
         bugfestCode: r.join_code,
         durationMinutes: r.duration_minutes,
-        totalMarks: meta.totalMarks,
+        totalMarks: effectiveTotalMarks,
         questionCount: qCount,
         allowedLanguage: meta.allowedLanguage,
         status: r.status,
@@ -254,7 +252,7 @@ app.get('/api/rounds', (req, res) => {
 app.patch('/api/rounds/:id', (req, res) => {
   try {
     const roundId = parseInt(req.params.id, 10);
-    const { action, status, durationMinutes, joinCode, startTime, endTime, extendMinutes } = req.body;
+    const { action, status, durationMinutes, joinCode, startTime, endTime, extendMinutes, totalMarks } = req.body;
 
     const currentRound = db.prepare('SELECT * FROM rounds WHERE id = ?').get(roundId);
     if (!currentRound) {
@@ -265,6 +263,7 @@ app.patch('/api/rounds/:id', (req, res) => {
     let newStartTime = startTime || currentRound.start_time;
     let newEndTime = endTime || currentRound.end_time;
     let newDuration = durationMinutes !== undefined && durationMinutes > 0 ? durationMinutes : currentRound.duration_minutes;
+    let newTotalMarks = totalMarks !== undefined && Number(totalMarks) > 0 ? Number(totalMarks) : (currentRound.total_marks || 35);
     let newJoinCode = currentRound.join_code;
 
     if (joinCode && joinCode.trim()) {
@@ -296,9 +295,18 @@ app.patch('/api/rounds/:id', (req, res) => {
 
     db.prepare(`
       UPDATE rounds 
-      SET status = ?, start_time = ?, end_time = ?, duration_minutes = ?, join_code = ?
+      SET status = ?, start_time = ?, end_time = ?, duration_minutes = ?, total_marks = ?, join_code = ?
       WHERE id = ?
-    `).run(newStatus, newStartTime, newEndTime, newDuration, newJoinCode, roundId);
+    `).run(newStatus, newStartTime, newEndTime, newDuration, newTotalMarks, newJoinCode, roundId);
+
+    // If totalMarks was specified or changed, split marks evenly across all questions in this round
+    if (totalMarks !== undefined) {
+      const qCount = db.prepare('SELECT COUNT(*) as cnt FROM questions WHERE round = ?').get(currentRound.round_number)?.cnt || 7;
+      if (qCount > 0) {
+        const splitMarks = Math.round(newTotalMarks / qCount);
+        db.prepare('UPDATE questions SET points = ? WHERE round = ?').run(splitMarks, currentRound.round_number);
+      }
+    }
 
     const updated = db.prepare('SELECT * FROM rounds WHERE id = ?').get(roundId);
 
@@ -310,6 +318,7 @@ app.patch('/api/rounds/:id', (req, res) => {
         title: updated.round_name,
         joinCode: updated.join_code,
         durationMinutes: updated.duration_minutes,
+        totalMarks: updated.total_marks || newTotalMarks,
         status: updated.status,
         startTime: updated.start_time,
         endTime: updated.end_time
@@ -476,29 +485,21 @@ app.get('/api/leaderboard', (req, res) => {
 
     const leaderboard = teams.map((team, idx) => {
       const r1 = db.prepare('SELECT * FROM team_rounds WHERE team_id = ? AND round_id = 1').get(team.id);
-      const r2 = db.prepare('SELECT * FROM team_rounds WHERE team_id = ? AND round_id = 2').get(team.id);
-      const r3 = db.prepare('SELECT * FROM team_rounds WHERE team_id = ? AND round_id = 3').get(team.id);
-
-      const r1Score = r1 ? r1.score : 0;
-      const r2Score = r2 ? r2.score : 0;
-      const r3Score = r3 ? r3.score : 0;
-      const totalScore = r1Score + r2Score + r3Score;
+      const totalScore = r1 ? r1.score : 0;
 
       const solvedCount = db.prepare(`
         SELECT COUNT(*) as cnt FROM answers WHERE team_id = ? AND status = 'Passed'
-      `).get(team.id).cnt;
+      `).get(team.id)?.cnt || 0;
 
       return {
         userId: team.id,
         teamName: team.team_name,
-        college: 'BUGWEST Participant',
-        round1Score: r1Score,
-        round2Score: r2Score,
-        round3Score: r3Score,
+        college: 'BugFest Participant',
+        round1Score: totalScore,
         totalScore,
         questionsSolved: solvedCount,
         timeUsedMinutes: 0,
-        status: (r1 && r1.status === 'completed' && r2 && r2.status === 'completed' && r3 && r3.status === 'completed') ? 'Completed' : 'Active',
+        status: (r1 && r1.status === 'completed') ? 'Completed' : 'Active',
         rank: idx + 1
       };
     });
@@ -535,12 +536,11 @@ app.get('/api/organizer/data', (req, res) => {
 
       // Static metadata matching frontend DEFAULT_ROUNDS
       const ROUND_META = {
-        1: { subtitle: 'Basic Debugging', description: 'Find basic syntax flaws, uninitialized variables, indentation errors, and simple logic bugs in C & Python.', totalMarks: 100, allowedLanguage: 'all' },
-        2: { subtitle: 'Core Programming & Debugging', description: 'Pointers, dynamic memory, structs, list references, recursion, custom exceptions, and algorithms.', totalMarks: 100, allowedLanguage: 'all' },
-        3: { subtitle: 'Advanced Professional Debugging', description: 'Double free, dangling pointers, MRO diamond inheritance, underflow partitioning, and memory corruption.', totalMarks: 100, allowedLanguage: 'all' }
+        1: { subtitle: 'BugFest Technical Arena', description: 'Core syntax, logic flaws, pointers, data structures, and algorithms in C & Python.', totalMarks: 35, allowedLanguage: 'all' }
       };
-      const meta = ROUND_META[r.round_number] || { subtitle: '', description: '', totalMarks: 100, allowedLanguage: 'all' };
-      const qCount = db.prepare('SELECT COUNT(*) as cnt FROM questions WHERE round = ?').get(r.round_number).cnt;
+      const meta = ROUND_META[r.round_number] || { subtitle: '', description: '', totalMarks: 35, allowedLanguage: 'all' };
+      const qCount = db.prepare('SELECT COUNT(*) as cnt FROM questions WHERE round = ?').get(r.round_number)?.cnt || 7;
+      const effectiveTotalMarks = r.total_marks || meta.totalMarks || 35;
 
       return {
         roundId: r.id,
@@ -551,7 +551,7 @@ app.get('/api/organizer/data', (req, res) => {
         joinCode: r.join_code,
         bugfestCode: r.join_code,
         durationMinutes: r.duration_minutes,
-        totalMarks: meta.totalMarks,
+        totalMarks: effectiveTotalMarks,
         questionCount: qCount,
         allowedLanguage: meta.allowedLanguage,
         status: r.status,
@@ -583,15 +583,11 @@ app.get('/api/organizer/data', (req, res) => {
       const teamAns = answers.filter(a => a.team_id === team.id);
 
       const roundScores = {
-        1: trs.find(t => t.round_id === 1)?.score || 0,
-        2: trs.find(t => t.round_id === 2)?.score || 0,
-        3: trs.find(t => t.round_id === 3)?.score || 0,
+        1: trs.find(t => t.round_id === 1)?.score || 0
       };
 
       const roundCompleted = {
-        1: trs.find(t => t.round_id === 1)?.status === 'completed',
-        2: trs.find(t => t.round_id === 2)?.status === 'completed',
-        3: trs.find(t => t.round_id === 3)?.status === 'completed',
+        1: trs.find(t => t.round_id === 1)?.status === 'completed'
       };
 
       const submissionsObj = {};
@@ -609,14 +605,9 @@ app.get('/api/organizer/data', (req, res) => {
         };
       });
 
-      const totalScore = roundScores[1] + roundScores[2] + roundScores[3];
-
-      // Determine current round: highest round that is not yet completed, min 1
-      let currentRound = 1;
-      if (roundCompleted[1] && !roundCompleted[2]) currentRound = 2;
-      else if (roundCompleted[1] && roundCompleted[2]) currentRound = 3;
-
-      const allDone = roundCompleted[1] && roundCompleted[2] && roundCompleted[3];
+      const totalScore = roundScores[1] || 0;
+      const currentRound = 1;
+      const allDone = Boolean(roundCompleted[1]);
 
       return {
         userId: team.id,
@@ -650,12 +641,14 @@ app.get('/api/organizer/data', (req, res) => {
 });
 
 // ----------------------------------------------------
-// PRODUCTION: Serve Vite-built frontend from dist/
+// PRODUCTION / HOSTING: Serve Vite-built frontend from dist/
 // In dev, Vite dev server handles the frontend.
 // ----------------------------------------------------
-if (process.env.NODE_ENV === 'production') {
-  const path = require('path');
-  const distPath = path.join(__dirname, '..', 'dist');
+const path = require('path');
+const fs = require('fs');
+const distPath = path.join(__dirname, '..', 'dist');
+
+if (process.env.NODE_ENV === 'production' || fs.existsSync(path.join(distPath, 'index.html'))) {
   app.use(express.static(distPath));
   // SPA fallback — all non-API routes serve index.html
   app.get('*', (req, res) => {

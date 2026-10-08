@@ -52,7 +52,7 @@ export const Navbar: React.FC<NavbarProps> = ({
             Overview
           </button>
 
-          {currentUser?.role === 'participant' && (
+          {activeView !== 'landing' && currentUser?.role === 'participant' && (
             <button
               onClick={() => onNavigate('participant-dashboard')}
               className={`flex items-center gap-1.5 transition-colors hover:text-slate-900 ${
@@ -66,7 +66,7 @@ export const Navbar: React.FC<NavbarProps> = ({
             </button>
           )}
 
-          {currentUser?.role === 'organizer' && (
+          {activeView !== 'landing' && currentUser?.role === 'organizer' && (
             <button
               onClick={() => onNavigate('organizer-dashboard')}
               className={`flex items-center gap-1.5 transition-colors hover:text-slate-900 ${
@@ -78,7 +78,7 @@ export const Navbar: React.FC<NavbarProps> = ({
             </button>
           )}
 
-          {currentUser?.role === 'organizer' && (
+          {activeView !== 'landing' && currentUser?.role === 'organizer' && (
             <button
               onClick={() => onNavigate('leaderboard')}
               className={`flex items-center gap-1.5 transition-colors hover:text-slate-900 ${
@@ -93,7 +93,22 @@ export const Navbar: React.FC<NavbarProps> = ({
 
         {/* Zone 3: Actions & Auth */}
         <div className="flex items-center gap-3">
-          {currentUser ? (
+          {activeView === 'landing' || !currentUser ? (
+            <div className="flex items-center gap-2">
+              <button
+                onClick={() => onOpenLogin('participant')}
+                className="px-3.5 py-1.5 text-xs font-semibold text-slate-700 bg-slate-100 hover:bg-slate-200 rounded-lg transition-colors"
+              >
+                Candidate Login
+              </button>
+              <button
+                onClick={() => onOpenLogin('organizer')}
+                className="px-3.5 py-1.5 text-xs font-semibold text-white bg-blue-600 hover:bg-blue-700 rounded-lg transition-colors shadow-2xs"
+              >
+                Organizer Login
+              </button>
+            </div>
+          ) : (
             <div className="flex items-center gap-3">
               <div className="flex items-center gap-2.5 pl-2">
                 <div className="text-right hidden sm:block">
@@ -116,12 +131,6 @@ export const Navbar: React.FC<NavbarProps> = ({
               >
                 <LogOut className="w-4 h-4" />
               </button>
-            </div>
-          ) : (
-            <div className="flex items-center">
-              <span className="text-sm font-semibold text-slate-700 whitespace-nowrap hidden sm:block">
-                Department of Artificial Intelligence
-              </span>
             </div>
           )}
         </div>

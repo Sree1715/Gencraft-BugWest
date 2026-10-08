@@ -907,12 +907,19 @@ export const OrganizerDashboard: React.FC<OrganizerDashboardProps> = ({
                         <label className="block font-bold text-slate-700 mb-1">
                           Total Marks
                         </label>
-                        <input
-                          type="number"
-                          value={round.totalMarks}
-                          onChange={(e) => onUpdateRound(round.roundId, { totalMarks: Number(e.target.value) })}
-                          className="p-1.5 border border-slate-300 rounded font-mono font-bold w-24 text-slate-900"
-                        />
+                        <div className="flex items-center gap-2">
+                          <input
+                            type="number"
+                            value={round.totalMarks}
+                            onChange={(e) => onUpdateRound(round.roundId, { totalMarks: Number(e.target.value) })}
+                            className="p-1.5 border border-slate-300 rounded font-mono font-bold w-24 text-slate-900"
+                          />
+                          <span className="text-xs text-blue-700 font-semibold bg-blue-50 px-2 py-1 rounded border border-blue-200">
+                            {questionCountInRound > 0 ? (
+                              <>⚡ {Math.round(round.totalMarks / questionCountInRound)} marks / question ({round.totalMarks} ÷ {questionCountInRound})</>
+                            ) : null}
+                          </span>
+                        </div>
                       </div>
 
                       <div>
