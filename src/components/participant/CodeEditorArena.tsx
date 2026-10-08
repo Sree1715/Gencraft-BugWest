@@ -223,7 +223,7 @@ export const CodeEditorArena: React.FC<CodeEditorArenaProps> = ({
     ? existingSubmission.totalTests
     : execResult
     ? execResult.totalTests
-    : currentQuestion.visibleTestCases.length;
+    : (currentQuestion.visibleTestCases?.length || 0);
 
   const currentRoundScore = session.roundScores[round.roundId] || 0;
 

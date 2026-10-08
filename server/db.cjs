@@ -135,16 +135,6 @@ if (questionCount === 0 && INITIAL_QUESTIONS && INITIAL_QUESTIONS.length > 0) {
   }
 }
 
-// Seed Default Teams if missing
-const teamCount = db.prepare('SELECT COUNT(*) as cnt FROM teams').get().cnt;
-if (teamCount === 0) {
-  const insertTeam = db.prepare(`
-    INSERT INTO teams (id, event_id, team_name, locked, created_at)
-    VALUES (?, ?, ?, 1, ?)
-  `);
-  insertTeam.run('team-alpha', 'evt-bugwest-2026', 'Team Alpha', '2026-10-06 09:00:00');
-  insertTeam.run('team-debuggers', 'evt-bugwest-2026', 'Team Debuggers', '2026-10-06 09:05:00');
-  insertTeam.run('team-codewarriors', 'evt-bugwest-2026', 'Code Warriors', '2026-10-06 09:10:00');
-}
+// Seed Default Teams removed
 
 module.exports = db;

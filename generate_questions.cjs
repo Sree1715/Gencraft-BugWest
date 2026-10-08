@@ -1,4 +1,8 @@
-[
+const fs = require('fs');
+const path = require('path');
+
+const questions = [
+  // ROUND 1 - 10 Questions
   {
     "id": "R1-Q01",
     "round": 1,
@@ -11,14 +15,7 @@
     "expectedOutput": "Hello",
     "marks": 5,
     "difficulty": "Easy",
-    "visibleTestCases": [
-      {
-        "id": "tc-1",
-        "input": "True",
-        "expectedOutput": "Hello",
-        "description": "Test true"
-      }
-    ]
+    "visibleTestCases": [{ "id": "tc-1", "input": "True", "expectedOutput": "Hello", "description": "Test true" }]
   },
   {
     "id": "R1-Q02",
@@ -32,14 +29,7 @@
     "expectedOutput": "1",
     "marks": 5,
     "difficulty": "Easy",
-    "visibleTestCases": [
-      {
-        "id": "tc-1",
-        "input": "",
-        "expectedOutput": "1",
-        "description": "Index 0"
-      }
-    ]
+    "visibleTestCases": [{ "id": "tc-1", "input": "", "expectedOutput": "1", "description": "Index 0" }]
   },
   {
     "id": "R1-Q03",
@@ -53,14 +43,7 @@
     "expectedOutput": "Welcome",
     "marks": 5,
     "difficulty": "Easy",
-    "visibleTestCases": [
-      {
-        "id": "tc-1",
-        "input": "",
-        "expectedOutput": "Welcome",
-        "description": "Print text"
-      }
-    ]
+    "visibleTestCases": [{ "id": "tc-1", "input": "", "expectedOutput": "Welcome", "description": "Print text" }]
   },
   {
     "id": "R1-Q04",
@@ -74,14 +57,7 @@
     "expectedOutput": "0\n1\n2",
     "marks": 5,
     "difficulty": "Easy",
-    "visibleTestCases": [
-      {
-        "id": "tc-1",
-        "input": "",
-        "expectedOutput": "0\n1\n2",
-        "description": "Loop print"
-      }
-    ]
+    "visibleTestCases": [{ "id": "tc-1", "input": "", "expectedOutput": "0\n1\n2", "description": "Loop print" }]
   },
   {
     "id": "R1-Q05",
@@ -95,14 +71,7 @@
     "expectedOutput": "Bugwest",
     "marks": 5,
     "difficulty": "Easy",
-    "visibleTestCases": [
-      {
-        "id": "tc-1",
-        "input": "",
-        "expectedOutput": "Bugwest",
-        "description": "Print string"
-      }
-    ]
+    "visibleTestCases": [{ "id": "tc-1", "input": "", "expectedOutput": "Bugwest", "description": "Print string" }]
   },
   {
     "id": "R1-Q06",
@@ -116,14 +85,7 @@
     "expectedOutput": "10",
     "marks": 5,
     "difficulty": "Easy",
-    "visibleTestCases": [
-      {
-        "id": "tc-1",
-        "input": "",
-        "expectedOutput": "10",
-        "description": "Assign and print"
-      }
-    ]
+    "visibleTestCases": [{ "id": "tc-1", "input": "", "expectedOutput": "10", "description": "Assign and print" }]
   },
   {
     "id": "R1-Q07",
@@ -137,14 +99,7 @@
     "expectedOutput": "7",
     "marks": 5,
     "difficulty": "Easy",
-    "visibleTestCases": [
-      {
-        "id": "tc-1",
-        "input": "5",
-        "expectedOutput": "7",
-        "description": "Add 2"
-      }
-    ]
+    "visibleTestCases": [{ "id": "tc-1", "input": "5", "expectedOutput": "7", "description": "Add 2" }]
   },
   {
     "id": "R1-Q08",
@@ -158,14 +113,7 @@
     "expectedOutput": "True",
     "marks": 5,
     "difficulty": "Easy",
-    "visibleTestCases": [
-      {
-        "id": "tc-1",
-        "input": "15",
-        "expectedOutput": "True",
-        "description": "Check condition"
-      }
-    ]
+    "visibleTestCases": [{ "id": "tc-1", "input": "15", "expectedOutput": "True", "description": "Check condition" }]
   },
   {
     "id": "R1-Q09",
@@ -179,14 +127,7 @@
     "expectedOutput": "6",
     "marks": 5,
     "difficulty": "Easy",
-    "visibleTestCases": [
-      {
-        "id": "tc-1",
-        "input": "",
-        "expectedOutput": "6",
-        "description": "Sum 1 to 3"
-      }
-    ]
+    "visibleTestCases": [{ "id": "tc-1", "input": "", "expectedOutput": "6", "description": "Sum 1 to 3" }]
   },
   {
     "id": "R1-Q10",
@@ -200,15 +141,10 @@
     "expectedOutput": "0\n1\nDone",
     "marks": 5,
     "difficulty": "Easy",
-    "visibleTestCases": [
-      {
-        "id": "tc-1",
-        "input": "",
-        "expectedOutput": "0\n1\nDone",
-        "description": "Loop then print"
-      }
-    ]
+    "visibleTestCases": [{ "id": "tc-1", "input": "", "expectedOutput": "0\n1\nDone", "description": "Loop then print" }]
   },
+
+  // ROUND 2 - 5 Questions
   {
     "id": "R2-Q01",
     "round": 2,
@@ -221,14 +157,7 @@
     "expectedOutput": "[0, 1, 4, 9, 16]",
     "marks": 10,
     "difficulty": "Medium",
-    "visibleTestCases": [
-      {
-        "id": "tc-1",
-        "input": "",
-        "expectedOutput": "[0, 1, 4, 9, 16]",
-        "description": "Squares list"
-      }
-    ]
+    "visibleTestCases": [{ "id": "tc-1", "input": "", "expectedOutput": "[0, 1, 4, 9, 16]", "description": "Squares list" }]
   },
   {
     "id": "R2-Q02",
@@ -242,14 +171,7 @@
     "expectedOutput": "12",
     "marks": 10,
     "difficulty": "Medium",
-    "visibleTestCases": [
-      {
-        "id": "tc-1",
-        "input": "",
-        "expectedOutput": "12",
-        "description": "Multiply two numbers"
-      }
-    ]
+    "visibleTestCases": [{ "id": "tc-1", "input": "", "expectedOutput": "12", "description": "Multiply two numbers" }]
   },
   {
     "id": "R2-Q03",
@@ -263,14 +185,7 @@
     "expectedOutput": "Even",
     "marks": 10,
     "difficulty": "Medium",
-    "visibleTestCases": [
-      {
-        "id": "tc-1",
-        "input": "4",
-        "expectedOutput": "Even",
-        "description": "Check even number"
-      }
-    ]
+    "visibleTestCases": [{ "id": "tc-1", "input": "4", "expectedOutput": "Even", "description": "Check even number" }]
   },
   {
     "id": "R2-Q04",
@@ -284,14 +199,7 @@
     "expectedOutput": "50",
     "marks": 10,
     "difficulty": "Medium",
-    "visibleTestCases": [
-      {
-        "id": "tc-1",
-        "input": "5",
-        "expectedOutput": "50",
-        "description": "Multiply by 10"
-      }
-    ]
+    "visibleTestCases": [{ "id": "tc-1", "input": "5", "expectedOutput": "50", "description": "Multiply by 10" }]
   },
   {
     "id": "R2-Q05",
@@ -305,13 +213,10 @@
     "expectedOutput": "99",
     "marks": 10,
     "difficulty": "Medium",
-    "visibleTestCases": [
-      {
-        "id": "tc-1",
-        "input": "[99, 88, 77]",
-        "expectedOutput": "99",
-        "description": "Return first element"
-      }
-    ]
+    "visibleTestCases": [{ "id": "tc-1", "input": "[99, 88, 77]", "expectedOutput": "99", "description": "Return first element" }]
   }
-]
+];
+
+const dest = path.join(__dirname, 'server', 'questionsData.json');
+fs.writeFileSync(dest, JSON.stringify(questions, null, 2), 'utf-8');
+console.log('Successfully updated questionsData.json');

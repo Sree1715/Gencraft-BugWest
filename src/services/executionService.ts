@@ -9,7 +9,7 @@ export class ExecutionService {
     code: string
   ): ExecutionResult {
     const startTime = performance.now();
-    const visibleTests = question.visibleTestCases;
+    const visibleTests = question.visibleTestCases || [];
 
     const { syntaxError, isFixed } = this.analyzeAndExecute(question, code);
 
@@ -85,7 +85,7 @@ export class ExecutionService {
     code: string
   ): ExecutionResult {
     const startTime = performance.now();
-    const allTests = [...question.visibleTestCases, ...question.hiddenTestCases];
+    const allTests = [...(question.visibleTestCases || []), ...(question.hiddenTestCases || [])];
 
     const { syntaxError, isFixed } = this.analyzeAndExecute(question, code);
 
