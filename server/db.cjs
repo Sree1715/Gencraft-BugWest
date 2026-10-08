@@ -1,15 +1,53 @@
-const Database = require('better-sqlite3');
 const path = require('path');
 const INITIAL_QUESTIONS = require('./questionsData.json');
 
 // DB_PATH env var lets Docker point the database at the mounted volume (/data/bugwest.db).
 // Falls back to the repo-local path for local development.
 const dbPath = process.env.DB_PATH || path.join(__dirname, '..', 'bugwest.db');
-const db = new Database(dbPath);
 
+let db;
 
-// Enable WAL mode for high concurrency
-db.pragma('journal_mode = WAL');
+try {
+  const Database = require('better-sqlite3');
+  db = new Database(dbPath);
+  db.pragma('journal_mode = WAL');
+  console.log('[Database] Loaded SQLite via better-sqlite3');
+} catch (err) {
+  try {
+    const { DatabaseSync } = require('node:sqlite');
+    const rawDb = new DatabaseSync(dbPath);
+    try { rawDb.exec('PRAGMA journal_mode = WAL;'); } catch (e) {}
+
+    class StatementWrapper {
+      constructor(stmt) {
+        this._stmt = stmt;
+      }
+      get(...args) {
+        if (args.length === 1 && Array.isArray(args[0])) return this._stmt.get(...args[0]);
+        return this._stmt.get(...args);
+      }
+      all(...args) {
+        if (args.length === 1 && Array.isArray(args[0])) return this._stmt.all(...args[0]);
+        return this._stmt.all(...args);
+      }
+      run(...args) {
+        if (args.length === 1 && Array.isArray(args[0])) return this._stmt.run(...args[0]);
+        return this._stmt.run(...args);
+      }
+    }
+
+    db = {
+      prepare: (sql) => new StatementWrapper(rawDb.prepare(sql)),
+      exec: (sql) => rawDb.exec(sql),
+      pragma: (sql) => { try { rawDb.exec(`PRAGMA ${sql};`); } catch (e) {} },
+      close: () => rawDb.close(),
+    };
+    console.log('[Database] Loaded SQLite via native node:sqlite');
+  } catch (fallbackErr) {
+    console.error('Failed to initialize database with better-sqlite3 or node:sqlite:', fallbackErr);
+    throw fallbackErr;
+  }
+}
 
 // Initialize schema
 db.exec(`

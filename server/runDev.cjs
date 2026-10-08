@@ -13,7 +13,8 @@ const serverProcess = spawn('node', [indexPath], {
 });
 
 // Start Vite Dev Server
-const viteProcess = spawn('npx', ['vite', '--port=3000', '--host=0.0.0.0'], {
+const npxCmd = process.platform === 'win32' ? 'npx.cmd' : 'npx';
+const viteProcess = spawn(npxCmd, ['vite', '--port=3000', '--host=0.0.0.0'], {
   stdio: 'inherit',
   shell: true,
   cwd: path.join(__dirname, '..')
