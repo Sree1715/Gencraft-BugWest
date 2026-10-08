@@ -1,0 +1,67 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 64 64" fill="none">
+  <defs>
+    <linearGradient id="bgGrad" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" stop-color="#0b1120" />
+      <stop offset="100%" stop-color="#030712" />
+    </linearGradient>
+    <linearGradient id="borderGrad" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" stop-color="#38bdf8" />
+      <stop offset="50%" stop-color="#2563eb" />
+      <stop offset="100%" stop-color="#6366f1" />
+    </linearGradient>
+    <radialGradient id="centerGlow" cx="50%" cy="55%" r="45%">
+      <stop offset="0%" stop-color="#3b82f6" stop-opacity="0.35" />
+      <stop offset="100%" stop-color="#1d4ed8" stop-opacity="0" />
+    </radialGradient>
+    <linearGradient id="shellLeft" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" stop-color="#2563eb" />
+      <stop offset="100%" stop-color="#1e40af" />
+    </linearGradient>
+    <linearGradient id="shellRight" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" stop-color="#3b82f6" />
+      <stop offset="100%" stop-color="#2563eb" />
+    </linearGradient>
+    <filter id="glow" x="-20%" y="-20%" width="140%" height="140%">
+      <feGaussianBlur stdDeviation="2" result="blur" />
+      <feComposite in="SourceGraphic" in2="blur" operator="over" />
+    </filter>
+  </defs>
+
+  <!-- Container Box -->
+  <rect width="64" height="64" rx="14" fill="url(#bgGrad)" />
+  <rect x="1" y="1" width="62" height="62" rx="13" fill="none" stroke="url(#borderGrad)" stroke-width="1.75" />
+  <circle cx="32" cy="35" r="22" fill="url(#centerGlow)" />
+
+  <!-- Bug Legs (6 articulated joints) -->
+  <!-- Top Pair -->
+  <path d="M22 28 L15 24 L10 26" stroke="#38bdf8" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round" />
+  <path d="M42 28 L49 24 L54 26" stroke="#38bdf8" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round" />
+
+  <!-- Middle Pair -->
+  <path d="M20 36 L13 36 L8 39" stroke="#38bdf8" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round" />
+  <path d="M44 36 L51 36 L56 39" stroke="#38bdf8" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round" />
+
+  <!-- Bottom Pair -->
+  <path d="M22 44 L16 48 L12 53" stroke="#38bdf8" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round" />
+  <path d="M42 44 L48 48 L52 53" stroke="#38bdf8" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round" />
+
+  <!-- Antennae -->
+  <path d="M28 17 C25 10 19 11 16 12" stroke="#38bdf8" stroke-width="2.2" stroke-linecap="round" fill="none" />
+  <circle cx="16" cy="12" r="1.6" fill="#a5f3fc" />
+  
+  <path d="M36 17 C39 10 45 11 48 12" stroke="#38bdf8" stroke-width="2.2" stroke-linecap="round" fill="none" />
+  <circle cx="48" cy="12" r="1.6" fill="#a5f3fc" />
+
+  <!-- Head -->
+  <path d="M24 22 C24 17 27.5 15 32 15 C36.5 15 40 17 40 22 Z" fill="#0284c7" />
+  <circle cx="28" cy="19" r="1.2" fill="#e0f2fe" />
+  <circle cx="36" cy="19" r="1.2" fill="#e0f2fe" />
+
+  <!-- Carapace Shells (Left & Right) -->
+  <path d="M30.5 24 C23 24 20 31 20 39 C20 46.5 25 49 30.5 49 Z" fill="url(#shellLeft)" />
+  <path d="M33.5 24 C41 24 44 31 44 39 C44 46.5 39 49 33.5 49 Z" fill="url(#shellRight)" />
+
+  <!-- Center Terminal Prompt '> _' Glyph -->
+  <path d="M27 32.5 L31 36.5 L27 40.5" stroke="#ffffff" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round" />
+  <line x1="33" y1="40.5" x2="37" y2="40.5" stroke="#38bdf8" stroke-width="2.4" stroke-linecap="round" />
+</svg>
