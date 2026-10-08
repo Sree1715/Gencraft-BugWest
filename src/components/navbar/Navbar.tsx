@@ -118,19 +118,10 @@ export const Navbar: React.FC<NavbarProps> = ({
               </button>
             </div>
           ) : (
-            <div className="flex items-center gap-2">
-              <button
-                onClick={() => onOpenLogin('participant')}
-                className="px-3.5 py-1.5 text-xs font-semibold text-slate-700 bg-slate-100 hover:bg-slate-200 rounded-lg transition-colors whitespace-nowrap"
-              >
-                Participant Login
-              </button>
-              <button
-                onClick={() => onOpenLogin('organizer')}
-                className="px-3.5 py-1.5 text-xs font-semibold text-white bg-slate-900 hover:bg-blue-600 rounded-lg transition-colors whitespace-nowrap shadow-sm"
-              >
-                Organizer Login
-              </button>
+            <div className="flex items-center">
+              <span className="text-sm font-semibold text-slate-700 whitespace-nowrap hidden sm:block">
+                Department of Artificial Intelligence
+              </span>
             </div>
           )}
         </div>

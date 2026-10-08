@@ -2,316 +2,1307 @@
   {
     "id": "R1-Q01",
     "round": 1,
-    "language": "python",
-    "title": "Missing Colon",
-    "description": "This function is supposed to print 'Hello' if x is true, but there is a syntax error.",
-    "bugDescription": "Missing colon after if condition.",
-    "buggyCode": "def greet(x):\n    if x\n        print('Hello')",
-    "correctSolution": "def greet(x):\n    if x:\n        print('Hello')",
-    "expectedOutput": "Hello",
+    "language": "c",
+    "title": "Array Sum Uninitialized Accumulator",
+    "description": "Calculate the sum of all elements in an integer array of size 5. The provided code gives unpredictable garbage values.",
+    "bugDescription": "Variable `sum` is not initialized to 0, leading to undefined behavior with residual stack garbage values, and missing semicolon after return.",
+    "buggyCode": "#include <stdio.h>\n\nint main() {\n    int arr[5] = {10, 20, 30, 40, 50};\n    int sum; // BUG: Uninitialized accumulator\n    \n    for (int i = 0; i < 5; i++) {\n        sum += arr[i];\n    }\n    \n    printf(\"%d\\n\", sum);\n    return 0 // BUG: Missing semicolon\n}",
+    "correctSolution": "#include <stdio.h>\n\nint main() {\n    int arr[5] = {10, 20, 30, 40, 50};\n    int sum = 0;\n    \n    for (int i = 0; i < 5; i++) {\n        sum += arr[i];\n    }\n    \n    printf(\"%d\\n\", sum);\n    return 0;\n}",
+    "expectedOutput": "150",
     "marks": 5,
     "difficulty": "Easy",
+    "timeLimitMinutes": 3,
     "visibleTestCases": [
       {
-        "id": "tc-1",
-        "input": "True",
-        "expectedOutput": "Hello",
-        "description": "Test true"
+        "id": "tc-r1-01-1",
+        "input": "",
+        "expectedOutput": "150",
+        "description": "Standard 5 element array sum"
+      },
+      {
+        "id": "tc-r1-01-2",
+        "input": "",
+        "expectedOutput": "150",
+        "description": "Zero baseline accumulator test"
       }
+    ],
+    "hiddenTestCases": [
+      {
+        "id": "tc-r1-01-h1",
+        "input": "",
+        "expectedOutput": "150",
+        "isHidden": true,
+        "description": "Stack isolation memory check"
+      }
+    ],
+    "isPublished": true,
+    "topics": [
+      "Arrays",
+      "Variable Initialization",
+      "Syntax"
     ]
   },
   {
     "id": "R1-Q02",
     "round": 1,
     "language": "python",
-    "title": "Incorrect Array Declaration",
-    "description": "Create a list containing numbers 1, 2, 3. The current syntax is wrong.",
-    "bugDescription": "Used {} instead of [] for a list.",
-    "buggyCode": "nums = {1, 2, 3}\nprint(nums[0])",
-    "correctSolution": "nums = [1, 2, 3]\nprint(nums[0])",
-    "expectedOutput": "1",
+    "title": "List Slicing Off-By-One & Indentation",
+    "description": "Extract the first 3 items from a grocery list and print them separated by commas. The program crashes with an IndentationError and fails to slice properly.",
+    "bugDescription": "Off-by-one slice index `[:2]` only yields 2 elements instead of 3, plus broken indentation in function body.",
+    "buggyCode": "def get_top_items(items):\n# BUG: Inconsistent indentation\nitems_slice = items[:2]\n    return \", \".join(items_slice)\n\ngrocery = [\"Apples\", \"Bananas\", \"Carrots\", \"Dates\", \"Eggs\"]\nprint(get_top_items(grocery))",
+    "correctSolution": "def get_top_items(items):\n    items_slice = items[:3]\n    return \", \".join(items_slice)\n\ngrocery = [\"Apples\", \"Bananas\", \"Carrots\", \"Dates\", \"Eggs\"]\nprint(get_top_items(grocery))",
+    "expectedOutput": "Apples, Bananas, Carrots",
     "marks": 5,
     "difficulty": "Easy",
+    "timeLimitMinutes": 3,
     "visibleTestCases": [
       {
-        "id": "tc-1",
+        "id": "tc-r1-02-1",
         "input": "",
-        "expectedOutput": "1",
-        "description": "Index 0"
+        "expectedOutput": "Apples, Bananas, Carrots",
+        "description": "Extract first 3 elements"
       }
+    ],
+    "hiddenTestCases": [
+      {
+        "id": "tc-r1-02-h1",
+        "input": "",
+        "expectedOutput": "Apples, Bananas, Carrots",
+        "isHidden": true,
+        "description": "Slice boundary assertion"
+      }
+    ],
+    "isPublished": true,
+    "topics": [
+      "Lists",
+      "Slicing",
+      "Indentation"
     ]
   },
   {
     "id": "R1-Q03",
     "round": 1,
-    "language": "python",
-    "title": "Wrong Variable Name",
-    "description": "Print the variable message, but there is a typo.",
-    "bugDescription": "Used 'Massage' instead of 'message'.",
-    "buggyCode": "message = 'Welcome'\nprint(Massage)",
-    "correctSolution": "message = 'Welcome'\nprint(message)",
-    "expectedOutput": "Welcome",
+    "language": "c",
+    "title": "For Loop Index Out of Bounds",
+    "description": "Print all numbers from index 0 to 4 in an array. Currently, the loop reads past the array boundary causing memory corruption.",
+    "bugDescription": "Loop condition uses `i <= 5` instead of `i < 5`, accessing arr[5] which is out of bounds.",
+    "buggyCode": "#include <stdio.h>\n\nint main() {\n    int nums[5] = {2, 4, 6, 8, 10};\n    \n    // BUG: Loop condition causes buffer over-read\n    for (int i = 0; i <= 5; i++) {\n        printf(\"%d \", nums[i]);\n    }\n    printf(\"\\n\");\n    return 0;\n}",
+    "correctSolution": "#include <stdio.h>\n\nint main() {\n    int nums[5] = {2, 4, 6, 8, 10};\n    \n    for (int i = 0; i < 5; i++) {\n        printf(\"%d \", nums[i]);\n    }\n    printf(\"\\n\");\n    return 0;\n}",
+    "expectedOutput": "2 4 6 8 10",
     "marks": 5,
     "difficulty": "Easy",
+    "timeLimitMinutes": 3,
     "visibleTestCases": [
       {
-        "id": "tc-1",
+        "id": "tc-r1-03-1",
         "input": "",
-        "expectedOutput": "Welcome",
-        "description": "Print text"
+        "expectedOutput": "2 4 6 8 10",
+        "description": "Sequential element printing"
       }
+    ],
+    "hiddenTestCases": [
+      {
+        "id": "tc-r1-03-h1",
+        "input": "",
+        "expectedOutput": "2 4 6 8 10",
+        "isHidden": true,
+        "description": "Memory bounds validation"
+      }
+    ],
+    "isPublished": true,
+    "topics": [
+      "Arrays",
+      "For Loops",
+      "Bounds Checking"
     ]
   },
   {
     "id": "R1-Q04",
     "round": 1,
     "language": "python",
-    "title": "Incorrect Variable in Loop",
-    "description": "Print numbers 0 to 2 using a for loop. It prints the loop iterable instead of the variable.",
-    "bugDescription": "Used 'i' instead of the loop variable 'j'.",
-    "buggyCode": "i = 5\nfor j in range(3):\n    print(i)",
-    "correctSolution": "for j in range(3):\n    print(j)",
-    "expectedOutput": "0\n1\n2",
+    "title": "String Immutability Item Assignment",
+    "description": "Replace the first character of a lowercase word with uppercase. Python throws a TypeError because strings cannot be mutated directly.",
+    "bugDescription": "Attempting `word[0] = word[0].upper()` violates Python string immutability.",
+    "buggyCode": "def capitalize_first(word):\n    # BUG: Strings are immutable in Python\n    word[0] = word[0].upper()\n    return word\n\ntext = \"gencraft\"\nprint(capitalize_first(text))",
+    "correctSolution": "def capitalize_first(word):\n    if not word:\n        return word\n    return word[0].upper() + word[1:]\n\ntext = \"gencraft\"\nprint(capitalize_first(text))",
+    "expectedOutput": "Gencraft",
     "marks": 5,
     "difficulty": "Easy",
+    "timeLimitMinutes": 3,
     "visibleTestCases": [
       {
-        "id": "tc-1",
+        "id": "tc-r1-04-1",
         "input": "",
-        "expectedOutput": "0\n1\n2",
-        "description": "Loop print"
+        "expectedOutput": "Gencraft",
+        "description": "String reconstruction capitalization"
       }
+    ],
+    "hiddenTestCases": [
+      {
+        "id": "tc-r1-04-h1",
+        "input": "",
+        "expectedOutput": "Gencraft",
+        "isHidden": true,
+        "description": "Immutability preservation check"
+      }
+    ],
+    "isPublished": true,
+    "topics": [
+      "Strings",
+      "Immutability",
+      "Type System"
     ]
   },
   {
     "id": "R1-Q05",
     "round": 1,
-    "language": "python",
-    "title": "Missing Bracket",
-    "description": "Call the print function with a string, but a bracket is missing.",
-    "bugDescription": "Missing closing parenthesis.",
-    "buggyCode": "print('Bugwest'",
-    "correctSolution": "print('Bugwest')",
-    "expectedOutput": "Bugwest",
+    "language": "c",
+    "title": "Integer Division Truncation in Average",
+    "description": "Calculate the floating-point average of three integers (7, 8, 9). The current code truncates precision and prints 0.00 or an integer.",
+    "bugDescription": "Integer division `(a + b + c) / 3` truncates decimals before assigning to float.",
+    "buggyCode": "#include <stdio.h>\n\nint main() {\n    int a = 7, b = 8, c = 9;\n    // BUG: Integer division truncates before float conversion\n    float avg = (a + b + c) / 3;\n    printf(\"%.2f\\n\", avg);\n    return 0;\n}",
+    "correctSolution": "#include <stdio.h>\n\nint main() {\n    int a = 7, b = 8, c = 9;\n    float avg = (float)(a + b + c) / 3.0f;\n    printf(\"%.2f\\n\", avg);\n    return 0;\n}",
+    "expectedOutput": "8.00",
     "marks": 5,
     "difficulty": "Easy",
+    "timeLimitMinutes": 3,
     "visibleTestCases": [
       {
-        "id": "tc-1",
+        "id": "tc-r1-05-1",
         "input": "",
-        "expectedOutput": "Bugwest",
-        "description": "Print string"
+        "expectedOutput": "8.00",
+        "description": "Float precision division"
       }
+    ],
+    "hiddenTestCases": [
+      {
+        "id": "tc-r1-05-h1",
+        "input": "",
+        "expectedOutput": "8.00",
+        "isHidden": true,
+        "description": "Explicit casting check"
+      }
+    ],
+    "isPublished": true,
+    "topics": [
+      "Type Casting",
+      "Arithmetic",
+      "Data Types"
     ]
   },
   {
     "id": "R1-Q06",
     "round": 1,
     "language": "python",
-    "title": "Simple Syntax Error",
-    "description": "Assign the value 10 to a variable and print it. The assignment operator is wrong.",
-    "bugDescription": "Used == instead of =.",
-    "buggyCode": "x == 10\nprint(x)",
-    "correctSolution": "x = 10\nprint(x)",
-    "expectedOutput": "10",
+    "title": "Mutable Default Argument Trap",
+    "description": "Add an item to a student roster. Subsequent calls with default parameters accumulate across function calls unexpectedly.",
+    "bugDescription": "Default parameter `roster=[]` is evaluated once at function definition time, leaking state between calls.",
+    "buggyCode": "# BUG: Mutable default argument retains state across calls\ndef register_student(name, roster=[]):\n    roster.append(name)\n    return roster\n\nclass_a = register_student(\"Alice\")\nclass_b = register_student(\"Bob\")\nprint(class_b)",
+    "correctSolution": "def register_student(name, roster=None):\n    if roster is None:\n        roster = []\n    roster.append(name)\n    return roster\n\nclass_a = register_student(\"Alice\")\nclass_b = register_student(\"Bob\")\nprint(class_b)",
+    "expectedOutput": "['Bob']",
     "marks": 5,
     "difficulty": "Easy",
+    "timeLimitMinutes": 3,
     "visibleTestCases": [
       {
-        "id": "tc-1",
+        "id": "tc-r1-06-1",
         "input": "",
-        "expectedOutput": "10",
-        "description": "Assign and print"
+        "expectedOutput": "['Bob']",
+        "description": "Independent function invocation"
       }
+    ],
+    "hiddenTestCases": [
+      {
+        "id": "tc-r1-06-h1",
+        "input": "",
+        "expectedOutput": "['Bob']",
+        "isHidden": true,
+        "description": "Default argument state isolation"
+      }
+    ],
+    "isPublished": true,
+    "topics": [
+      "Functions",
+      "Mutable Defaults",
+      "Scope"
     ]
   },
   {
     "id": "R1-Q07",
     "round": 1,
-    "language": "python",
-    "title": "Basic Logic Mistake",
-    "description": "The function should add 2 to the input, but it subtracts 2 instead.",
-    "bugDescription": "Used - instead of +.",
-    "buggyCode": "def add_two(x):\n    return x - 2",
-    "correctSolution": "def add_two(x):\n    return x + 2",
-    "expectedOutput": "7",
+    "language": "c",
+    "title": "Dangling Else / Missing Braces in Grade Logic",
+    "description": "Assign letter grade \"A\" if score >= 90 and extra credit is valid. Otherwise, assign \"Review\". The else branch associates with the wrong if condition.",
+    "bugDescription": "Dangling else problem: the else binds to the inner `if (extraCredit)` instead of the outer `if (score >= 90)`.",
+    "buggyCode": "#include <stdio.h>\n\nint main() {\n    int score = 85;\n    int extraCredit = 0;\n    \n    // BUG: Missing braces causes dangling else binding\n    if (score >= 90)\n        if (extraCredit)\n            printf(\"A+\\n\");\n    else\n        printf(\"Review\\n\");\n        \n    return 0;\n}",
+    "correctSolution": "#include <stdio.h>\n\nint main() {\n    int score = 85;\n    int extraCredit = 0;\n    \n    if (score >= 90) {\n        if (extraCredit) {\n            printf(\"A+\\n\");\n        }\n    } else {\n        printf(\"Review\\n\");\n    }\n        \n    return 0;\n}",
+    "expectedOutput": "Review",
     "marks": 5,
     "difficulty": "Easy",
+    "timeLimitMinutes": 3,
     "visibleTestCases": [
       {
-        "id": "tc-1",
-        "input": "5",
-        "expectedOutput": "7",
-        "description": "Add 2"
+        "id": "tc-r1-07-1",
+        "input": "",
+        "expectedOutput": "Review",
+        "description": "Score below threshold branch"
       }
+    ],
+    "hiddenTestCases": [
+      {
+        "id": "tc-r1-07-h1",
+        "input": "",
+        "expectedOutput": "Review",
+        "isHidden": true,
+        "description": "Explicit control flow braces"
+      }
+    ],
+    "isPublished": true,
+    "topics": [
+      "If-Else",
+      "Control Flow",
+      "Bracing"
     ]
   },
   {
     "id": "R1-Q08",
     "round": 1,
     "language": "python",
-    "title": "Simple Condition Mistake",
-    "description": "Return True if x is greater than 10. The condition currently returns True if x is less than 10.",
-    "bugDescription": "Used < instead of >.",
-    "buggyCode": "def is_greater_than_10(x):\n    return x < 10",
-    "correctSolution": "def is_greater_than_10(x):\n    return x > 10",
-    "expectedOutput": "True",
+    "title": "Variable Scope Shadowing in Counter",
+    "description": "Increment a global submission counter when processing candidate submissions. Python raises UnboundLocalError.",
+    "bugDescription": "Assigning to `count` inside function shadows global variable without `global` keyword.",
+    "buggyCode": "total_submissions = 10\n\ndef record_submission():\n    # BUG: UnboundLocalError: local variable referenced before assignment\n    total_submissions = total_submissions + 1\n    return total_submissions\n\nprint(record_submission())",
+    "correctSolution": "total_submissions = 10\n\ndef record_submission():\n    global total_submissions\n    total_submissions = total_submissions + 1\n    return total_submissions\n\nprint(record_submission())",
+    "expectedOutput": "11",
     "marks": 5,
     "difficulty": "Easy",
+    "timeLimitMinutes": 3,
     "visibleTestCases": [
       {
-        "id": "tc-1",
-        "input": "15",
-        "expectedOutput": "True",
-        "description": "Check condition"
+        "id": "tc-r1-08-1",
+        "input": "",
+        "expectedOutput": "11",
+        "description": "Global counter mutation"
       }
+    ],
+    "hiddenTestCases": [
+      {
+        "id": "tc-r1-08-h1",
+        "input": "",
+        "expectedOutput": "11",
+        "isHidden": true,
+        "description": "Global scope access verification"
+      }
+    ],
+    "isPublished": true,
+    "topics": [
+      "Scope",
+      "Global Keyword",
+      "Functions"
     ]
   },
   {
     "id": "R1-Q09",
     "round": 1,
-    "language": "python",
-    "title": "Simple Loop Mistake",
-    "description": "Calculate the sum of numbers from 1 to 3. The loop stops too early.",
-    "bugDescription": "Range needs to go to 4.",
-    "buggyCode": "total = 0\nfor i in range(1, 3):\n    total += i\nprint(total)",
-    "correctSolution": "total = 0\nfor i in range(1, 4):\n    total += i\nprint(total)",
-    "expectedOutput": "6",
+    "language": "c",
+    "title": "Missing Address-Of (&) in Scanf Pointer Simulation",
+    "description": "Read an integer value into a variable via a mock function that uses a pointer. The current implementation passes the integer value instead of its memory address.",
+    "bugDescription": "Function expects pointer `int *val`, but caller passes `x` instead of `&x`.",
+    "buggyCode": "#include <stdio.h>\n\nvoid update_val(int *target) {\n    *target = 42;\n}\n\nint main() {\n    int num = 0;\n    // BUG: Passing variable directly instead of pointer address &num\n    update_val(num);\n    printf(\"%d\\n\", num);\n    return 0;\n}",
+    "correctSolution": "#include <stdio.h>\n\nvoid update_val(int *target) {\n    *target = 42;\n}\n\nint main() {\n    int num = 0;\n    update_val(&num);\n    printf(\"%d\\n\", num);\n    return 0;\n}",
+    "expectedOutput": "42",
     "marks": 5,
     "difficulty": "Easy",
+    "timeLimitMinutes": 3,
     "visibleTestCases": [
       {
-        "id": "tc-1",
+        "id": "tc-r1-09-1",
         "input": "",
-        "expectedOutput": "6",
-        "description": "Sum 1 to 3"
+        "expectedOutput": "42",
+        "description": "Address-of operator resolution"
       }
+    ],
+    "hiddenTestCases": [
+      {
+        "id": "tc-r1-09-h1",
+        "input": "",
+        "expectedOutput": "42",
+        "isHidden": true,
+        "description": "Pass by reference memory check"
+      }
+    ],
+    "isPublished": true,
+    "topics": [
+      "Pointers",
+      "Function Parameters",
+      "Address-Of"
     ]
   },
   {
     "id": "R1-Q10",
     "round": 1,
     "language": "python",
-    "title": "Meaningful Indentation Mistake",
-    "description": "Print 'Done' only after the loop completes. Currently it prints during the loop.",
-    "bugDescription": "print('Done') is inside the loop instead of outside.",
-    "buggyCode": "for i in range(2):\n    print(i)\n    print('Done')",
-    "correctSolution": "for i in range(2):\n    print(i)\nprint('Done')",
-    "expectedOutput": "0\n1\nDone",
+    "title": "Dictionary KeyError on Missing Key",
+    "description": "Retrieve a participant score from a dictionary. If the participant ID is not found, return 0 instead of crashing with a KeyError.",
+    "bugDescription": "Direct key subscript `scores[user_id]` throws KeyError on nonexistent keys instead of using `.get(key, 0)`.",
+    "buggyCode": "def get_participant_score(scores, user_id):\n    # BUG: Unchecked direct index causes KeyError\n    return scores[user_id]\n\nresults = {\"GC001\": 85, \"GC002\": 92}\nprint(get_participant_score(results, \"GC003\"))",
+    "correctSolution": "def get_participant_score(scores, user_id):\n    return scores.get(user_id, 0)\n\nresults = {\"GC001\": 85, \"GC002\": 92}\nprint(get_participant_score(results, \"GC003\"))",
+    "expectedOutput": "0",
     "marks": 5,
     "difficulty": "Easy",
+    "timeLimitMinutes": 3,
     "visibleTestCases": [
       {
-        "id": "tc-1",
+        "id": "tc-r1-10-1",
         "input": "",
-        "expectedOutput": "0\n1\nDone",
-        "description": "Loop then print"
+        "expectedOutput": "0",
+        "description": "Fallback on missing dict key"
       }
+    ],
+    "hiddenTestCases": [
+      {
+        "id": "tc-r1-10-h1",
+        "input": "",
+        "expectedOutput": "0",
+        "isHidden": true,
+        "description": "Default dictionary handling"
+      }
+    ],
+    "isPublished": true,
+    "topics": [
+      "Dictionaries",
+      "KeyError",
+      "Error Handling"
+    ]
+  },
+  {
+    "id": "R1-Q11",
+    "round": 1,
+    "language": "c",
+    "title": "While Loop Infinite Iteration",
+    "description": "Count down from 5 to 1 and print each number. The loop never terminates because the decrement step is missing inside the block.",
+    "bugDescription": "Variable `count` is never decremented inside while body, creating an infinite loop.",
+    "buggyCode": "#include <stdio.h>\n\nint main() {\n    int count = 5;\n    \n    while (count > 0) {\n        printf(\"%d \", count);\n        // BUG: Missing count-- causes infinite loop\n    }\n    printf(\"\\n\");\n    return 0;\n}",
+    "correctSolution": "#include <stdio.h>\n\nint main() {\n    int count = 5;\n    \n    while (count > 0) {\n        printf(\"%d \", count);\n        count--;\n    }\n    printf(\"\\n\");\n    return 0;\n}",
+    "expectedOutput": "5 4 3 2 1",
+    "marks": 5,
+    "difficulty": "Easy",
+    "timeLimitMinutes": 3,
+    "visibleTestCases": [
+      {
+        "id": "tc-r1-11-1",
+        "input": "",
+        "expectedOutput": "5 4 3 2 1",
+        "description": "Countdown sequence termination"
+      }
+    ],
+    "hiddenTestCases": [
+      {
+        "id": "tc-r1-11-h1",
+        "input": "",
+        "expectedOutput": "5 4 3 2 1",
+        "isHidden": true,
+        "description": "Loop step execution verification"
+      }
+    ],
+    "isPublished": true,
+    "topics": [
+      "While Loops",
+      "Loop Control",
+      "Termination"
+    ]
+  },
+  {
+    "id": "R1-Q12",
+    "round": 1,
+    "language": "python",
+    "title": "Type Mismatch String Concatenation vs Integer Sum",
+    "description": "Add two numbers provided as string inputs (\"25\" and \"75\"). The current code concatenates them into \"2575\" instead of producing the mathematical sum 100.",
+    "bugDescription": "String values are added directly with `+` instead of casting to `int()`.",
+    "buggyCode": "def add_values(val1, val2):\n    # BUG: Concatenating strings instead of summing numeric values\n    return val1 + val2\n\na = \"25\"\nb = \"75\"\nprint(add_values(a, b))",
+    "correctSolution": "def add_values(val1, val2):\n    return int(val1) + int(val2)\n\na = \"25\"\nb = \"75\"\nprint(add_values(a, b))",
+    "expectedOutput": "100",
+    "marks": 5,
+    "difficulty": "Easy",
+    "timeLimitMinutes": 3,
+    "visibleTestCases": [
+      {
+        "id": "tc-r1-12-1",
+        "input": "",
+        "expectedOutput": "100",
+        "description": "Parse string digits to integer sum"
+      }
+    ],
+    "hiddenTestCases": [
+      {
+        "id": "tc-r1-12-h1",
+        "input": "",
+        "expectedOutput": "100",
+        "isHidden": true,
+        "description": "Type conversion safety check"
+      }
+    ],
+    "isPublished": true,
+    "topics": [
+      "Type Casting",
+      "Strings",
+      "Arithmetic"
+    ]
+  },
+  {
+    "id": "R1-Q13",
+    "round": 1,
+    "language": "c",
+    "title": "Array In-Place Reversal Over-Swapping",
+    "description": "Reverse an array of 4 integers in place. Currently the loop traverses the entire array length, swapping elements twice and reverting to the original order.",
+    "bugDescription": "Reversal loop iterates until `i < n` instead of `i < n / 2`, undoing all swaps.",
+    "buggyCode": "#include <stdio.h>\n\nint main() {\n    int arr[4] = {1, 2, 3, 4};\n    int n = 4;\n    \n    // BUG: Iterating to n swaps elements back to original positions\n    for (int i = 0; i < n; i++) {\n        int temp = arr[i];\n        arr[i] = arr[n - 1 - i];\n        arr[n - 1 - i] = temp;\n    }\n    \n    for (int i = 0; i < n; i++) {\n        printf(\"%d \", arr[i]);\n    }\n    printf(\"\\n\");\n    return 0;\n}",
+    "correctSolution": "#include <stdio.h>\n\nint main() {\n    int arr[4] = {1, 2, 3, 4};\n    int n = 4;\n    \n    for (int i = 0; i < n / 2; i++) {\n        int temp = arr[i];\n        arr[i] = arr[n - 1 - i];\n        arr[n - 1 - i] = temp;\n    }\n    \n    for (int i = 0; i < n; i++) {\n        printf(\"%d \", arr[i]);\n    }\n    printf(\"\\n\");\n    return 0;\n}",
+    "expectedOutput": "4 3 2 1",
+    "marks": 5,
+    "difficulty": "Easy",
+    "timeLimitMinutes": 3,
+    "visibleTestCases": [
+      {
+        "id": "tc-r1-13-1",
+        "input": "",
+        "expectedOutput": "4 3 2 1",
+        "description": "In-place array reversal"
+      }
+    ],
+    "hiddenTestCases": [
+      {
+        "id": "tc-r1-13-h1",
+        "input": "",
+        "expectedOutput": "4 3 2 1",
+        "isHidden": true,
+        "description": "Midpoint swap termination"
+      }
+    ],
+    "isPublished": true,
+    "topics": [
+      "Arrays",
+      "Algorithms",
+      "Logic Errors"
+    ]
+  },
+  {
+    "id": "R1-Q14",
+    "round": 1,
+    "language": "python",
+    "title": "Prime Number Checker Missing Composite Early Break",
+    "description": "Check if number 9 is prime. The current code misidentifies 9 as prime because it checks only oddness or fails to break on composite divisors.",
+    "bugDescription": "Loop fails to reject composite numbers because return statement is misplaced inside loop or early return logic is flawed.",
+    "buggyCode": "def is_prime(n):\n    if n <= 1:\n        return False\n    for i in range(2, n):\n        # BUG: Returns True on first non-divisor instead of checking all\n        if n % i != 0:\n            return True\n        else:\n            return False\n\nprint(is_prime(9))",
+    "correctSolution": "def is_prime(n):\n    if n <= 1:\n        return False\n    for i in range(2, int(n**0.5) + 1):\n        if n % i == 0:\n            return False\n    return True\n\nprint(is_prime(9))",
+    "expectedOutput": "False",
+    "marks": 5,
+    "difficulty": "Easy",
+    "timeLimitMinutes": 3,
+    "visibleTestCases": [
+      {
+        "id": "tc-r1-14-1",
+        "input": "",
+        "expectedOutput": "False",
+        "description": "Composite number 9 detection"
+      }
+    ],
+    "hiddenTestCases": [
+      {
+        "id": "tc-r1-14-h1",
+        "input": "",
+        "expectedOutput": "False",
+        "isHidden": true,
+        "description": "Square root factor verification"
+      }
+    ],
+    "isPublished": true,
+    "topics": [
+      "Loops",
+      "Prime Check",
+      "Control Flow"
+    ]
+  },
+  {
+    "id": "R1-Q15",
+    "round": 1,
+    "language": "c",
+    "title": "Missing Null Terminator in Character Array",
+    "description": "Manually copy characters \"BUG\" into a destination char array and print as a string with `%s`. Output contains random garbage characters at the end.",
+    "bugDescription": "Destination string is not null-terminated with `\\0`, causing `printf(\"%s\")` to run over memory.",
+    "buggyCode": "#include <stdio.h>\n\nint main() {\n    char src[] = \"BUG\";\n    char dest[4];\n    \n    dest[0] = src[0];\n    dest[1] = src[1];\n    dest[2] = src[2];\n    // BUG: dest[3] is not set to '\\0' null terminator\n    \n    printf(\"%s\\n\", dest);\n    return 0;\n}",
+    "correctSolution": "#include <stdio.h>\n\nint main() {\n    char src[] = \"BUG\";\n    char dest[4];\n    \n    dest[0] = src[0];\n    dest[1] = src[1];\n    dest[2] = src[2];\n    dest[3] = '\\0';\n    \n    printf(\"%s\\n\", dest);\n    return 0;\n}",
+    "expectedOutput": "BUG",
+    "marks": 5,
+    "difficulty": "Easy",
+    "timeLimitMinutes": 3,
+    "visibleTestCases": [
+      {
+        "id": "tc-r1-15-1",
+        "input": "",
+        "expectedOutput": "BUG",
+        "description": "String termination safety"
+      }
+    ],
+    "hiddenTestCases": [
+      {
+        "id": "tc-r1-15-h1",
+        "input": "",
+        "expectedOutput": "BUG",
+        "isHidden": true,
+        "description": "Null-byte buffer sanity"
+      }
+    ],
+    "isPublished": true,
+    "topics": [
+      "Strings",
+      "Memory Bounds",
+      "C Basics"
+    ]
+  },
+  {
+    "id": "R1-Q16",
+    "round": 1,
+    "language": "python",
+    "title": "Modifying List While Iterating Over It",
+    "description": "Remove all even numbers from a list of integers `[1, 2, 4, 5, 6]`. The code skips consecutive even numbers due to index shifting during deletion.",
+    "bugDescription": "Calling `nums.remove(x)` inside `for x in nums` shifts subsequent list elements, causing loop to skip index.",
+    "buggyCode": "def remove_evens(nums):\n    # BUG: Mutating list during iteration skips elements\n    for x in nums:\n        if x % 2 == 0:\n            nums.remove(x)\n    return nums\n\ndata = [1, 2, 4, 5, 6]\nprint(remove_evens(data))",
+    "correctSolution": "def remove_evens(nums):\n    return [x for x in nums if x % 2 != 0]\n\ndata = [1, 2, 4, 5, 6]\nprint(remove_evens(data))",
+    "expectedOutput": "[1, 5]",
+    "marks": 5,
+    "difficulty": "Easy",
+    "timeLimitMinutes": 3,
+    "visibleTestCases": [
+      {
+        "id": "tc-r1-16-1",
+        "input": "",
+        "expectedOutput": "[1, 5]",
+        "description": "Filter consecutive evens properly"
+      }
+    ],
+    "hiddenTestCases": [
+      {
+        "id": "tc-r1-16-h1",
+        "input": "",
+        "expectedOutput": "[1, 5]",
+        "isHidden": true,
+        "description": "List comprehension purity check"
+      }
+    ],
+    "isPublished": true,
+    "topics": [
+      "Lists",
+      "Iteration",
+      "List Comprehensions"
+    ]
+  },
+  {
+    "id": "R1-Q17",
+    "round": 1,
+    "language": "c",
+    "title": "Operator Precedence in Bitwise vs Comparison",
+    "description": "Check if integer 5 has its lowest bit set (is odd). In C, `==` has higher precedence than `&`, causing unexpected zero evaluation.",
+    "bugDescription": "`if (num & 1 == 1)` evaluates `(1 == 1)` first, yielding `num & 1` which behaves differently with other masks or parentheses.",
+    "buggyCode": "#include <stdio.h>\n\nint main() {\n    int val = 5;\n    // BUG: Missing parentheses around bitwise operation\n    if (val & 1 == 0) {\n        printf(\"Even\\n\");\n    } else {\n        printf(\"Odd\\n\");\n    }\n    return 0;\n}",
+    "correctSolution": "#include <stdio.h>\n\nint main() {\n    int val = 5;\n    if ((val & 1) == 0) {\n        printf(\"Even\\n\");\n    } else {\n        printf(\"Odd\\n\");\n    }\n    return 0;\n}",
+    "expectedOutput": "Odd",
+    "marks": 5,
+    "difficulty": "Easy",
+    "timeLimitMinutes": 3,
+    "visibleTestCases": [
+      {
+        "id": "tc-r1-17-1",
+        "input": "",
+        "expectedOutput": "Odd",
+        "description": "Bitwise mask precedence check"
+      }
+    ],
+    "hiddenTestCases": [
+      {
+        "id": "tc-r1-17-h1",
+        "input": "",
+        "expectedOutput": "Odd",
+        "isHidden": true,
+        "description": "Operator precedence bracket test"
+      }
+    ],
+    "isPublished": true,
+    "topics": [
+      "Bitwise Operators",
+      "Precedence",
+      "Conditions"
+    ]
+  },
+  {
+    "id": "R1-Q18",
+    "round": 1,
+    "language": "python",
+    "title": "Factorial Recursion Missing Base Case",
+    "description": "Compute factorial of 4. The function triggers RecursionError / Maximum recursion depth exceeded because base condition is missing or wrong.",
+    "bugDescription": "Base case `if n == 0` is missing, causing infinite recursion into negative numbers.",
+    "buggyCode": "def factorial(n):\n    # BUG: Missing base case triggers infinite recursion\n    return n * factorial(n - 1)\n\nprint(factorial(4))",
+    "correctSolution": "def factorial(n):\n    if n <= 1:\n        return 1\n    return n * factorial(n - 1)\n\nprint(factorial(4))",
+    "expectedOutput": "24",
+    "marks": 5,
+    "difficulty": "Easy",
+    "timeLimitMinutes": 3,
+    "visibleTestCases": [
+      {
+        "id": "tc-r1-18-1",
+        "input": "",
+        "expectedOutput": "24",
+        "description": "Base case termination at n=1"
+      }
+    ],
+    "hiddenTestCases": [
+      {
+        "id": "tc-r1-18-h1",
+        "input": "",
+        "expectedOutput": "24",
+        "isHidden": true,
+        "description": "Stack overflow prevention"
+      }
+    ],
+    "isPublished": true,
+    "topics": [
+      "Recursion",
+      "Base Cases",
+      "Functions"
+    ]
+  },
+  {
+    "id": "R1-Q19",
+    "round": 1,
+    "language": "c",
+    "title": "Switch Statement Unintended Fallthrough",
+    "description": "Print the status label for status code 1. Output prints \"ActivePausedUnknown\" due to omitted break statements.",
+    "bugDescription": "Missing `break;` statements inside `switch` cases cause unintended execution fallthrough.",
+    "buggyCode": "#include <stdio.h>\n\nint main() {\n    int status = 1;\n    switch (status) {\n        case 1:\n            printf(\"Active\");\n            // BUG: Missing break falls through to case 2\n        case 2:\n            printf(\"Paused\");\n            // BUG: Missing break falls through to default\n        default:\n            printf(\"Unknown\");\n    }\n    printf(\"\\n\");\n    return 0;\n}",
+    "correctSolution": "#include <stdio.h>\n\nint main() {\n    int status = 1;\n    switch (status) {\n        case 1:\n            printf(\"Active\");\n            break;\n        case 2:\n            printf(\"Paused\");\n            break;\n        default:\n            printf(\"Unknown\");\n            break;\n    }\n    printf(\"\\n\");\n    return 0;\n}",
+    "expectedOutput": "Active",
+    "marks": 5,
+    "difficulty": "Easy",
+    "timeLimitMinutes": 3,
+    "visibleTestCases": [
+      {
+        "id": "tc-r1-19-1",
+        "input": "",
+        "expectedOutput": "Active",
+        "description": "Isolated single switch case exit"
+      }
+    ],
+    "hiddenTestCases": [
+      {
+        "id": "tc-r1-19-h1",
+        "input": "",
+        "expectedOutput": "Active",
+        "isHidden": true,
+        "description": "Break statement verification"
+      }
+    ],
+    "isPublished": true,
+    "topics": [
+      "Switch Statements",
+      "Break",
+      "Control Flow"
+    ]
+  },
+  {
+    "id": "R1-Q20",
+    "round": 1,
+    "language": "python",
+    "title": "Tuple Immutability in Unique Tag Accumulator",
+    "description": "Convert a list of duplicate tags into unique elements preserving clean ordering. The code attempts to append directly to a tuple, crashing with AttributeError.",
+    "bugDescription": "Tuples have no `.append()` method because they are immutable. Convert to set or list.",
+    "buggyCode": "def collect_tags(tag_list):\n    result = ()\n    for tag in tag_list:\n        if tag not in result:\n            # BUG: Tuples are immutable and lack .append()\n            result.append(tag)\n    return list(result)\n\ntags = [\"c\", \"python\", \"c\", \"algo\"]\nprint(collect_tags(tags))",
+    "correctSolution": "def collect_tags(tag_list):\n    result = []\n    for tag in tag_list:\n        if tag not in result:\n            result.append(tag)\n    return result\n\ntags = [\"c\", \"python\", \"c\", \"algo\"]\nprint(collect_tags(tags))",
+    "expectedOutput": "['c', 'python', 'algo']",
+    "marks": 5,
+    "difficulty": "Easy",
+    "timeLimitMinutes": 3,
+    "visibleTestCases": [
+      {
+        "id": "tc-r1-20-1",
+        "input": "",
+        "expectedOutput": "['c', 'python', 'algo']",
+        "description": "Ordered deduplication"
+      }
+    ],
+    "hiddenTestCases": [
+      {
+        "id": "tc-r1-20-h1",
+        "input": "",
+        "expectedOutput": "['c', 'python', 'algo']",
+        "isHidden": true,
+        "description": "Tuple vs list structure"
+      }
+    ],
+    "isPublished": true,
+    "topics": [
+      "Tuples",
+      "Lists",
+      "Deduplication"
     ]
   },
   {
     "id": "R2-Q01",
     "round": 2,
-    "language": "python",
-    "title": "For Loop Error",
-    "description": "Create a list of squares of numbers from 0 to 4 using a for loop. The loop variable is wrong.",
-    "bugDescription": "Used 'i * 2' instead of 'i * i'.",
-    "buggyCode": "squares = []\nfor i in range(5):\n    squares.append(i * 2)\nprint(squares)",
-    "correctSolution": "squares = []\nfor i in range(5):\n    squares.append(i * i)\nprint(squares)",
-    "expectedOutput": "[0, 1, 4, 9, 16]",
+    "language": "c",
+    "title": "Pointer Swap Pass-by-Value Error in Sort Partition",
+    "description": "Implement a helper function `swap` to exchange two integer values in an array. Currently, the function swaps copies of variables, leaving the original array unchanged.",
+    "bugDescription": "The `swap` function parameters are pass-by-value `int a, int b` instead of pointers `int *a, int *b`.",
+    "buggyCode": "#include <stdio.h>\n\n// BUG: Swapping local copies instead of memory pointers\nvoid swap(int a, int b) {\n    int temp = a;\n    a = b;\n    b = temp;\n}\n\nint main() {\n    int x = 10, y = 20;\n    swap(x, y);\n    printf(\"x=%d, y=%d\\n\", x, y);\n    return 0;\n}",
+    "correctSolution": "#include <stdio.h>\n\nvoid swap(int *a, int *b) {\n    int temp = *a;\n    *a = *b;\n    *b = temp;\n}\n\nint main() {\n    int x = 10, y = 20;\n    swap(&x, &y);\n    printf(\"x=%d, y=%d\\n\", x, y);\n    return 0;\n}",
+    "expectedOutput": "x=20, y=10",
     "marks": 10,
     "difficulty": "Medium",
+    "timeLimitMinutes": 5,
     "visibleTestCases": [
       {
-        "id": "tc-1",
+        "id": "tc-r2-01-1",
         "input": "",
-        "expectedOutput": "[0, 1, 4, 9, 16]",
-        "description": "Squares list"
+        "expectedOutput": "x=20, y=10",
+        "description": "Pointer dereference value exchange"
       }
+    ],
+    "hiddenTestCases": [
+      {
+        "id": "tc-r2-01-h1",
+        "input": "",
+        "expectedOutput": "x=20, y=10",
+        "isHidden": true,
+        "description": "Memory mutation persistence"
+      }
+    ],
+    "isPublished": true,
+    "topics": [
+      "Pointers",
+      "Pass-by-Reference",
+      "Functions"
     ]
   },
   {
     "id": "R2-Q02",
     "round": 2,
     "language": "python",
-    "title": "Function Return Value",
-    "description": "The function should return the product of a and b, but it returns nothing.",
-    "bugDescription": "Missing 'return' keyword.",
-    "buggyCode": "def multiply(a, b):\n    a * b\n\nprint(multiply(3, 4))",
-    "correctSolution": "def multiply(a, b):\n    return a * b\n\nprint(multiply(3, 4))",
-    "expectedOutput": "12",
+    "title": "Custom Class __hash__ & __eq__ Mismatch in Set Lookup",
+    "description": "A Student object with the same ID should be treated as duplicate when inserted into a set. Currently, set allows duplicates because `__hash__` and `__eq__` are not defined.",
+    "bugDescription": "Class lacks `__eq__` and `__hash__` dunder methods, causing default identity comparison (`is`) instead of value equality.",
+    "buggyCode": "class Student:\n    def __init__(self, student_id, name):\n        self.student_id = student_id\n        self.name = name\n\n# BUG: Missing __eq__ and __hash__ allows duplicate instances with same ID in set\ns1 = Student(\"GC001\", \"Alex\")\ns2 = Student(\"GC001\", \"Alex Duplicate\")\nstudents = {s1, s2}\nprint(len(students))",
+    "correctSolution": "class Student:\n    def __init__(self, student_id, name):\n        self.student_id = student_id\n        self.name = name\n\n    def __eq__(self, other):\n        if isinstance(other, Student):\n            return self.student_id == other.student_id\n        return False\n\n    def __hash__(self):\n        return hash(self.student_id)\n\ns1 = Student(\"GC001\", \"Alex\")\ns2 = Student(\"GC001\", \"Alex Duplicate\")\nstudents = {s1, s2}\nprint(len(students))",
+    "expectedOutput": "1",
     "marks": 10,
     "difficulty": "Medium",
+    "timeLimitMinutes": 5,
     "visibleTestCases": [
       {
-        "id": "tc-1",
+        "id": "tc-r2-02-1",
         "input": "",
-        "expectedOutput": "12",
-        "description": "Multiply two numbers"
+        "expectedOutput": "1",
+        "description": "Set duplicate elimination by custom hash"
       }
+    ],
+    "hiddenTestCases": [
+      {
+        "id": "tc-r2-02-h1",
+        "input": "",
+        "expectedOutput": "1",
+        "isHidden": true,
+        "description": "Dunder hashing protocol consistency"
+      }
+    ],
+    "isPublished": true,
+    "topics": [
+      "OOP",
+      "Dunder Methods",
+      "Sets",
+      "Hashing"
     ]
   },
   {
     "id": "R2-Q03",
     "round": 2,
-    "language": "python",
-    "title": "If/Else Logic",
-    "description": "Return 'Even' if a number is even, else 'Odd'. The logic is inverted.",
-    "bugDescription": "Modulo logic is flipped.",
-    "buggyCode": "def check_even(n):\n    if n % 2 != 0:\n        return 'Even'\n    else:\n        return 'Odd'",
-    "correctSolution": "def check_even(n):\n    if n % 2 == 0:\n        return 'Even'\n    else:\n        return 'Odd'",
-    "expectedOutput": "Even",
+    "language": "c",
+    "title": "Struct Pointer Arrow Operator & Null Dereference",
+    "description": "Initialize a Player struct pointer and set score to 100. The code attempts to access members through an unallocated pointer or incorrect dot operator.",
+    "bugDescription": "Player pointer `p` is never allocated memory via malloc before dereferencing with arrow operator, causing segmentation fault.",
+    "buggyCode": "#include <stdio.h>\n#include <stdlib.h>\n\ntypedef struct {\n    int id;\n    int score;\n} Player;\n\nint main() {\n    Player *p; // BUG: Dangling uninitialized pointer\n    p->id = 1;\n    p->score = 100;\n    \n    printf(\"Player %d: %d\\n\", p->id, p->score);\n    return 0;\n}",
+    "correctSolution": "#include <stdio.h>\n#include <stdlib.h>\n\ntypedef struct {\n    int id;\n    int score;\n} Player;\n\nint main() {\n    Player *p = (Player *)malloc(sizeof(Player));\n    if (p == NULL) return 1;\n    \n    p->id = 1;\n    p->score = 100;\n    \n    printf(\"Player %d: %d\\n\", p->id, p->score);\n    free(p);\n    return 0;\n}",
+    "expectedOutput": "Player 1: 100",
     "marks": 10,
     "difficulty": "Medium",
+    "timeLimitMinutes": 5,
     "visibleTestCases": [
       {
-        "id": "tc-1",
-        "input": "4",
-        "expectedOutput": "Even",
-        "description": "Check even number"
+        "id": "tc-r2-03-1",
+        "input": "",
+        "expectedOutput": "Player 1: 100",
+        "description": "Struct dynamic allocation"
       }
+    ],
+    "hiddenTestCases": [
+      {
+        "id": "tc-r2-03-h1",
+        "input": "",
+        "expectedOutput": "Player 1: 100",
+        "isHidden": true,
+        "description": "Heap safety and free invocation"
+      }
+    ],
+    "isPublished": true,
+    "topics": [
+      "Structs",
+      "Dynamic Memory",
+      "Segmentation Fault"
     ]
   },
   {
     "id": "R2-Q04",
     "round": 2,
     "language": "python",
-    "title": "Write Code: Multiply by 10",
-    "description": "Write a 1-line function to multiply the input 'n' by 10 and return it.",
-    "bugDescription": "Empty function.",
-    "buggyCode": "def multiply_by_10(n):\n    # Write your code here",
-    "correctSolution": "def multiply_by_10(n):\n    return n * 10",
-    "expectedOutput": "50",
+    "title": "Shallow Copy Mutation in 2D Matrix",
+    "description": "Create a 3x3 game grid initialized with zeroes. Mutating grid[0][0] = 1 should not alter any other rows, but currently turns the entire first column to 1.",
+    "bugDescription": "List multiplication `[[0] * 3] * 3` clones the same row reference 3 times.",
+    "buggyCode": "# BUG: Shallow row multiplication duplicates inner list reference\ngrid = [[0] * 3] * 3\ngrid[0][0] = 1\n\n# Print grid as flattened list\nflat = [val for row in grid for val in row]\nprint(flat)",
+    "correctSolution": "grid = [[0] * 3 for _ in range(3)]\ngrid[0][0] = 1\n\nflat = [val for row in grid for val in row]\nprint(flat)",
+    "expectedOutput": "[1, 0, 0, 0, 0, 0, 0, 0, 0]",
     "marks": 10,
     "difficulty": "Medium",
+    "timeLimitMinutes": 5,
     "visibleTestCases": [
       {
-        "id": "tc-1",
-        "input": "5",
-        "expectedOutput": "50",
-        "description": "Multiply by 10"
+        "id": "tc-r2-04-1",
+        "input": "",
+        "expectedOutput": "[1, 0, 0, 0, 0, 0, 0, 0, 0]",
+        "description": "Independent 2D grid cell mutation"
       }
+    ],
+    "hiddenTestCases": [
+      {
+        "id": "tc-r2-04-h1",
+        "input": "",
+        "expectedOutput": "[1, 0, 0, 0, 0, 0, 0, 0, 0]",
+        "isHidden": true,
+        "description": "Deep reference independence"
+      }
+    ],
+    "isPublished": true,
+    "topics": [
+      "Lists",
+      "References",
+      "2D Arrays"
     ]
   },
   {
     "id": "R2-Q05",
     "round": 2,
-    "language": "python",
-    "title": "Write Code: First Element",
-    "description": "Write a 1-line function that returns the first element of the given list 'lst'.",
-    "bugDescription": "Empty function.",
-    "buggyCode": "def get_first(lst):\n    # Write your code here",
-    "correctSolution": "def get_first(lst):\n    return lst[0]",
-    "expectedOutput": "99",
+    "language": "c",
+    "title": "Dynamic Array Allocation Size Calculation Bug",
+    "description": "Allocate an array of 5 doubles on heap and populate with values. The code uses `sizeof(int)` instead of `sizeof(double)`, leading to heap buffer overflow.",
+    "bugDescription": "`malloc(n * sizeof(int))` allocates 20 bytes instead of 40 bytes for 5 doubles, corrupting adjacent heap chunks.",
+    "buggyCode": "#include <stdio.h>\n#include <stdlib.h>\n\nint main() {\n    int n = 5;\n    // BUG: Allocating with sizeof(int) instead of sizeof(double)\n    double *arr = (double *)malloc(n * sizeof(int));\n    \n    for (int i = 0; i < n; i++) {\n        arr[i] = (i + 1) * 1.5;\n    }\n    \n    printf(\"%.1f\\n\", arr[4]);\n    free(arr);\n    return 0;\n}",
+    "correctSolution": "#include <stdio.h>\n#include <stdlib.h>\n\nint main() {\n    int n = 5;\n    double *arr = (double *)malloc(n * sizeof(double));\n    if (!arr) return 1;\n    \n    for (int i = 0; i < n; i++) {\n        arr[i] = (i + 1) * 1.5;\n    }\n    \n    printf(\"%.1f\\n\", arr[4]);\n    free(arr);\n    return 0;\n}",
+    "expectedOutput": "7.5",
     "marks": 10,
     "difficulty": "Medium",
+    "timeLimitMinutes": 5,
     "visibleTestCases": [
       {
-        "id": "tc-1",
-        "input": "[99, 88, 77]",
-        "expectedOutput": "99",
-        "description": "Return first element"
+        "id": "tc-r2-05-1",
+        "input": "",
+        "expectedOutput": "7.5",
+        "description": "Heap buffer double-precision element"
       }
+    ],
+    "hiddenTestCases": [
+      {
+        "id": "tc-r2-05-h1",
+        "input": "",
+        "expectedOutput": "7.5",
+        "isHidden": true,
+        "description": "Memory bounds size calculation"
+      }
+    ],
+    "isPublished": true,
+    "topics": [
+      "Dynamic Memory",
+      "malloc",
+      "sizeof"
+    ]
+  },
+  {
+    "id": "R2-Q06",
+    "round": 2,
+    "language": "python",
+    "title": "Custom Exception Flow & Fall-Through Suppression",
+    "description": "Parse an integer token. If parsing fails, catch ValueError and raise a custom InvalidTokenError. Currently the code swallows all exceptions silently.",
+    "bugDescription": "Bare `except:` block masks all errors, or fails to properly raise custom exception hierarchy.",
+    "buggyCode": "class InvalidTokenError(Exception):\n    pass\n\ndef process_token(token):\n    try:\n        val = int(token)\n        return val * 2\n    except:\n        # BUG: Swallowing error and returning None instead of raising InvalidTokenError\n        return None\n\ntry:\n    result = process_token(\"abc\")\n    print(result)\nexcept InvalidTokenError:\n    print(\"Caught InvalidTokenError\")",
+    "correctSolution": "class InvalidTokenError(Exception):\n    pass\n\ndef process_token(token):\n    try:\n        val = int(token)\n        return val * 2\n    except ValueError as e:\n        raise InvalidTokenError(\"Failed to parse token\") from e\n\ntry:\n    result = process_token(\"abc\")\n    print(result)\nexcept InvalidTokenError:\n    print(\"Caught InvalidTokenError\")",
+    "expectedOutput": "Caught InvalidTokenError",
+    "marks": 10,
+    "difficulty": "Medium",
+    "timeLimitMinutes": 5,
+    "visibleTestCases": [
+      {
+        "id": "tc-r2-06-1",
+        "input": "",
+        "expectedOutput": "Caught InvalidTokenError",
+        "description": "Custom exception handling propagation"
+      }
+    ],
+    "hiddenTestCases": [
+      {
+        "id": "tc-r2-06-h1",
+        "input": "",
+        "expectedOutput": "Caught InvalidTokenError",
+        "isHidden": true,
+        "description": "Specific exception catching"
+      }
+    ],
+    "isPublished": true,
+    "topics": [
+      "Exceptions",
+      "OOP",
+      "Control Flow"
+    ]
+  },
+  {
+    "id": "R2-Q07",
+    "round": 2,
+    "language": "c",
+    "title": "Singly Linked List Node Insertion Pointer Severing",
+    "description": "Insert a new node with value 15 into a linked list between node 10 and 20. The current code severs the rest of the list, losing node 20.",
+    "bugDescription": "`prev->next = new_node; new_node->next = prev->next;` creates a self-loop and loses remaining chain.",
+    "buggyCode": "#include <stdio.h>\n#include <stdlib.h>\n\nstruct Node {\n    int data;\n    struct Node* next;\n};\n\nint main() {\n    struct Node* first = (struct Node*)malloc(sizeof(struct Node));\n    struct Node* third = (struct Node*)malloc(sizeof(struct Node));\n    struct Node* second = (struct Node*)malloc(sizeof(struct Node));\n    \n    first->data = 10;\n    first->next = third;\n    \n    third->data = 20;\n    third->next = NULL;\n    \n    second->data = 15;\n    \n    // BUG: Assigning first->next first overwrites pointer before saving to second->next\n    first->next = second;\n    second->next = first->next; // Causes circular self-loop\n    \n    printf(\"%d %d %d\\n\", first->data, first->next->data, first->next->next ? first->next->next->data : -1);\n    return 0;\n}",
+    "correctSolution": "#include <stdio.h>\n#include <stdlib.h>\n\nstruct Node {\n    int data;\n    struct Node* next;\n};\n\nint main() {\n    struct Node* first = (struct Node*)malloc(sizeof(struct Node));\n    struct Node* third = (struct Node*)malloc(sizeof(struct Node));\n    struct Node* second = (struct Node*)malloc(sizeof(struct Node));\n    \n    first->data = 10;\n    first->next = third;\n    \n    third->data = 20;\n    third->next = NULL;\n    \n    second->data = 15;\n    \n    second->next = first->next;\n    first->next = second;\n    \n    printf(\"%d %d %d\\n\", first->data, first->next->data, first->next->next->data);\n    \n    free(second);\n    free(third);\n    free(first);\n    return 0;\n}",
+    "expectedOutput": "10 15 20",
+    "marks": 10,
+    "difficulty": "Medium",
+    "timeLimitMinutes": 5,
+    "visibleTestCases": [
+      {
+        "id": "tc-r2-07-1",
+        "input": "",
+        "expectedOutput": "10 15 20",
+        "description": "Linked list node insertion sequence"
+      }
+    ],
+    "hiddenTestCases": [
+      {
+        "id": "tc-r2-07-h1",
+        "input": "",
+        "expectedOutput": "10 15 20",
+        "isHidden": true,
+        "description": "Chain pointer preservation"
+      }
+    ],
+    "isPublished": true,
+    "topics": [
+      "Linked Lists",
+      "Pointers",
+      "Data Structures"
+    ]
+  },
+  {
+    "id": "R2-Q08",
+    "round": 2,
+    "language": "python",
+    "title": "Binary Search Midpoint Calculation & Infinite Loop",
+    "description": "Perform binary search for target 7 in sorted list `[1, 3, 5, 7, 9, 11]`. The search hangs in an infinite loop due to improper boundary updates.",
+    "bugDescription": "`low = mid` without `+ 1` leads to infinite loop when `low == mid`.",
+    "buggyCode": "def binary_search(arr, target):\n    low = 0\n    high = len(arr) - 1\n    \n    while low <= high:\n        mid = (low + high) // 2\n        if arr[mid] == target:\n            return mid\n        elif arr[mid] < target:\n            # BUG: Missing +1 causes infinite loop when low and mid coincide\n            low = mid\n        else:\n            high = mid - 1\n    return -1\n\nnums = [1, 3, 5, 7, 9, 11]\nprint(binary_search(nums, 7))",
+    "correctSolution": "def binary_search(arr, target):\n    low = 0\n    high = len(arr) - 1\n    \n    while low <= high:\n        mid = (low + high) // 2\n        if arr[mid] == target:\n            return mid\n        elif arr[mid] < target:\n            low = mid + 1\n        else:\n            high = mid - 1\n    return -1\n\nnums = [1, 3, 5, 7, 9, 11]\nprint(binary_search(nums, 7))",
+    "expectedOutput": "3",
+    "marks": 10,
+    "difficulty": "Medium",
+    "timeLimitMinutes": 5,
+    "visibleTestCases": [
+      {
+        "id": "tc-r2-08-1",
+        "input": "",
+        "expectedOutput": "3",
+        "description": "Binary search index retrieval"
+      }
+    ],
+    "hiddenTestCases": [
+      {
+        "id": "tc-r2-08-h1",
+        "input": "",
+        "expectedOutput": "3",
+        "isHidden": true,
+        "description": "Boundary convergence check"
+      }
+    ],
+    "isPublished": true,
+    "topics": [
+      "Binary Search",
+      "Algorithms",
+      "Loop Termination"
+    ]
+  },
+  {
+    "id": "R2-Q09",
+    "round": 2,
+    "language": "c",
+    "title": "String Reversal in C with Pointers (Const Literal Segfault)",
+    "description": "Reverse string \"HELLO\" in place using two pointer iterators. The current code attempts to mutate a string literal in read-only memory.",
+    "bugDescription": "`char *str = \"HELLO\";` points to read-only `.rodata` segment. Attempting in-place swap causes Segmentation Fault (SIGSEGV). Must use `char str[] = \"HELLO\";`.",
+    "buggyCode": "#include <stdio.h>\n#include <string.h>\n\nint main() {\n    // BUG: String literal is placed in read-only text segment\n    char *str = \"HELLO\";\n    int len = strlen(str);\n    char *start = str;\n    char *end = str + len - 1;\n    \n    while (start < end) {\n        char tmp = *start;\n        *start = *end; // SEGFAULT here\n        *end = tmp;\n        start++;\n        end--;\n    }\n    \n    printf(\"%s\\n\", str);\n    return 0;\n}",
+    "correctSolution": "#include <stdio.h>\n#include <string.h>\n\nint main() {\n    char str[] = \"HELLO\";\n    int len = strlen(str);\n    char *start = str;\n    char *end = str + len - 1;\n    \n    while (start < end) {\n        char tmp = *start;\n        *start = *end;\n        *end = tmp;\n        start++;\n        end--;\n    }\n    \n    printf(\"%s\\n\", str);\n    return 0;\n}",
+    "expectedOutput": "OLLEH",
+    "marks": 10,
+    "difficulty": "Medium",
+    "timeLimitMinutes": 5,
+    "visibleTestCases": [
+      {
+        "id": "tc-r2-09-1",
+        "input": "",
+        "expectedOutput": "OLLEH",
+        "description": "Writable stack array string reversal"
+      }
+    ],
+    "hiddenTestCases": [
+      {
+        "id": "tc-r2-09-h1",
+        "input": "",
+        "expectedOutput": "OLLEH",
+        "isHidden": true,
+        "description": "Memory segment write permission"
+      }
+    ],
+    "isPublished": true,
+    "topics": [
+      "Pointers",
+      "Memory Segments",
+      "Strings"
+    ]
+  },
+  {
+    "id": "R2-Q10",
+    "round": 2,
+    "language": "python",
+    "title": "Generator Object Exhaustion on Repeated Iteration",
+    "description": "Calculate both the minimum and maximum of a sequence from an iterator generator. The second call finds nothing because generator streams can only be consumed once.",
+    "bugDescription": "Generators exhaust after one traversal. Must convert generator to list or recreate iterator.",
+    "buggyCode": "def generate_multiples(n, limit):\n    for i in range(1, limit + 1):\n        yield n * i\n\n# BUG: Generator object exhausts after min(); max() raises ValueError\ngen = generate_multiples(3, 4)\nsmallest = min(gen)\nlargest = max(gen)\nprint(f\"min={smallest}, max={largest}\")",
+    "correctSolution": "def generate_multiples(n, limit):\n    for i in range(1, limit + 1):\n        yield n * i\n\n# Convert generator to list to preserve elements for multiple passes\nvalues = list(generate_multiples(3, 4))\nsmallest = min(values)\nlargest = max(values)\nprint(f\"min={smallest}, max={largest}\")",
+    "expectedOutput": "min=3, max=12",
+    "marks": 10,
+    "difficulty": "Medium",
+    "timeLimitMinutes": 5,
+    "visibleTestCases": [
+      {
+        "id": "tc-r2-10-1",
+        "input": "",
+        "expectedOutput": "min=3, max=12",
+        "description": "Re-usable collection calculation"
+      }
+    ],
+    "hiddenTestCases": [
+      {
+        "id": "tc-r2-10-h1",
+        "input": "",
+        "expectedOutput": "min=3, max=12",
+        "isHidden": true,
+        "description": "Iterator exhaustion awareness"
+      }
+    ],
+    "isPublished": true,
+    "topics": [
+      "Generators",
+      "Iterators",
+      "Builtins"
+    ]
+  },
+  {
+    "id": "R3-Q01",
+    "round": 3,
+    "language": "c",
+    "title": "Double Free & Dangling Pointer in Dynamic String Stack",
+    "description": "Implement a dynamic stack of strings. Popping and cleaning items triggers heap corruption `double free or corruption (out)` because the popped pointer is freed twice.",
+    "bugDescription": "Stack node pop frees the internal string buffer, and then stack cleanup frees the same buffer pointer without nullifying.",
+    "buggyCode": "#include <stdio.h>\n#include <stdlib.h>\n#include <string.h>\n\ntypedef struct StackNode {\n    char *text;\n    struct StackNode *next;\n} StackNode;\n\nvoid push(StackNode **top, const char *msg) {\n    StackNode *node = (StackNode *)malloc(sizeof(StackNode));\n    node->text = strdup(msg);\n    node->next = *top;\n    *top = node;\n}\n\nchar* pop(StackNode **top) {\n    if (!*top) return NULL;\n    StackNode *temp = *top;\n    char *ret = temp->text;\n    *top = temp->next;\n    // BUG: Freeing ret here AND caller frees again causes double-free\n    free(temp->text);\n    free(temp);\n    return ret;\n}\n\nint main() {\n    StackNode *stack = NULL;\n    push(&stack, \"GENCRAFT_CORE\");\n    char *val = pop(&stack);\n    printf(\"Popped: %s\\n\", val ? val : \"NULL\");\n    return 0;\n}",
+    "correctSolution": "#include <stdio.h>\n#include <stdlib.h>\n#include <string.h>\n\ntypedef struct StackNode {\n    char *text;\n    struct StackNode *next;\n} StackNode;\n\nvoid push(StackNode **top, const char *msg) {\n    StackNode *node = (StackNode *)malloc(sizeof(StackNode));\n    node->text = strdup(msg);\n    node->next = *top;\n    *top = node;\n}\n\nchar* pop(StackNode **top) {\n    if (!*top) return NULL;\n    StackNode *temp = *top;\n    char *ret = temp->text;\n    *top = temp->next;\n    free(temp);\n    return ret;\n}\n\nint main() {\n    StackNode *stack = NULL;\n    push(&stack, \"GENCRAFT_CORE\");\n    char *val = pop(&stack);\n    printf(\"Popped: %s\\n\", val ? val : \"NULL\");\n    if (val) free(val);\n    return 0;\n}",
+    "expectedOutput": "Popped: GENCRAFT_CORE",
+    "marks": 20,
+    "difficulty": "Hard",
+    "timeLimitMinutes": 10,
+    "visibleTestCases": [
+      {
+        "id": "tc-r3-01-1",
+        "input": "",
+        "expectedOutput": "Popped: GENCRAFT_CORE",
+        "description": "Single ownership heap transfer"
+      }
+    ],
+    "hiddenTestCases": [
+      {
+        "id": "tc-r3-01-h1",
+        "input": "",
+        "expectedOutput": "Popped: GENCRAFT_CORE",
+        "isHidden": true,
+        "description": "Heap sanity check no double free"
+      }
+    ],
+    "isPublished": true,
+    "topics": [
+      "Dynamic Memory",
+      "Double Free",
+      "Dangling Pointers",
+      "Data Structures"
+    ]
+  },
+  {
+    "id": "R3-Q02",
+    "round": 3,
+    "language": "python",
+    "title": "Diamond Inheritance & Method Resolution Order (MRO) Super() Error",
+    "description": "Implement a diamond inheritance hierarchy `A -> B, C -> D`. Calling `d.execute()` should invoke initialize from both branches in proper cooperative MRO order, but crashes or skips branch C.",
+    "bugDescription": "Direct hardcoded parent calls `A.__init__(self)` bypass cooperative `super().__init__()`, breaking Python C3 linearization.",
+    "buggyCode": "class A:\n    def process(self):\n        return [\"A\"]\n\nclass B(A):\n    def process(self):\n        # BUG: Direct base class call breaks cooperative MRO chaining\n        return [\"B\"] + A.process(self)\n\nclass C(A):\n    def process(self):\n        return [\"C\"] + A.process(self)\n\nclass D(B, C):\n    def process(self):\n        # BUG: Only calls B, skipping C completely\n        return [\"D\"] + B.process(self)\n\nd = D()\nprint(\"->\".join(d.process()))",
+    "correctSolution": "class A:\n    def process(self):\n        return [\"A\"]\n\nclass B(A):\n    def process(self):\n        return [\"B\"] + super().process()\n\nclass C(A):\n    def process(self):\n        return [\"C\"] + super().process()\n\nclass D(B, C):\n    def process(self):\n        return [\"D\"] + super().process()\n\nd = D()\nprint(\"->\".join(d.process()))",
+    "expectedOutput": "D->B->C->A",
+    "marks": 20,
+    "difficulty": "Hard",
+    "timeLimitMinutes": 10,
+    "visibleTestCases": [
+      {
+        "id": "tc-r3-02-1",
+        "input": "",
+        "expectedOutput": "D->B->C->A",
+        "description": "Full C3 MRO cooperative inheritance resolution"
+      }
+    ],
+    "hiddenTestCases": [
+      {
+        "id": "tc-r3-02-h1",
+        "input": "",
+        "expectedOutput": "D->B->C->A",
+        "isHidden": true,
+        "description": "Super chaining integrity"
+      }
+    ],
+    "isPublished": true,
+    "topics": [
+      "OOP",
+      "MRO",
+      "Super",
+      "Diamond Problem"
+    ]
+  },
+  {
+    "id": "R3-Q03",
+    "round": 3,
+    "language": "c",
+    "title": "QuickSort Lomuto Partition Index Underflow on Equal Elements",
+    "description": "Sort an array containing duplicate elements `[5, 2, 5, 1, 5]`. The partition function gets stuck or accesses negative array indices.",
+    "bugDescription": "Partition index variable declared as `unsigned int` or boundary condition `<=` causes infinite recursion on identical values.",
+    "buggyCode": "#include <stdio.h>\n\nvoid swap(int *a, int *b) {\n    int t = *a;\n    *a = *b;\n    *b = t;\n}\n\nint partition(int arr[], int low, int high) {\n    int pivot = arr[high];\n    // BUG: signed comparison with unsigned index underflows to 4294967295\n    int i = low - 1;\n    \n    for (int j = low; j < high; j++) {\n        // BUG: Strict equality missing causes unbalanced partition\n        if (arr[j] < pivot) {\n            i++;\n            swap(&arr[i], &arr[j]);\n        }\n    }\n    swap(&arr[i + 1], &arr[high]);\n    return (i + 1);\n}\n\nvoid quicksort(int arr[], int low, int high) {\n    // BUG: Missing check for low < high allows stack overflow\n    if (low < high) {\n        int pi = partition(arr, low, high);\n        quicksort(arr, low, pi - 1);\n        quicksort(arr, pi + 1, high);\n    }\n}\n\nint main() {\n    int arr[5] = {5, 2, 5, 1, 5};\n    quicksort(arr, 0, 4);\n    for (int i = 0; i < 5; i++) printf(\"%d \", arr[i]);\n    printf(\"\\n\");\n    return 0;\n}",
+    "correctSolution": "#include <stdio.h>\n\nvoid swap(int *a, int *b) {\n    int t = *a;\n    *a = *b;\n    *b = t;\n}\n\nint partition(int arr[], int low, int high) {\n    int pivot = arr[high];\n    int i = low - 1;\n    \n    for (int j = low; j < high; j++) {\n        if (arr[j] <= pivot) {\n            i++;\n            swap(&arr[i], &arr[j]);\n        }\n    }\n    swap(&arr[i + 1], &arr[high]);\n    return (i + 1);\n}\n\nvoid quicksort(int arr[], int low, int high) {\n    if (low < high) {\n        int pi = partition(arr, low, high);\n        quicksort(arr, low, pi - 1);\n        quicksort(arr, pi + 1, high);\n    }\n}\n\nint main() {\n    int arr[5] = {5, 2, 5, 1, 5};\n    quicksort(arr, 0, 4);\n    for (int i = 0; i < 5; i++) printf(\"%d \", arr[i]);\n    printf(\"\\n\");\n    return 0;\n}",
+    "expectedOutput": "1 2 5 5 5",
+    "marks": 20,
+    "difficulty": "Hard",
+    "timeLimitMinutes": 10,
+    "visibleTestCases": [
+      {
+        "id": "tc-r3-03-1",
+        "input": "",
+        "expectedOutput": "1 2 5 5 5",
+        "description": "Sorted array with duplicate keys"
+      }
+    ],
+    "hiddenTestCases": [
+      {
+        "id": "tc-r3-03-h1",
+        "input": "",
+        "expectedOutput": "1 2 5 5 5",
+        "isHidden": true,
+        "description": "Lomuto stability partition check"
+      }
+    ],
+    "isPublished": true,
+    "topics": [
+      "Algorithms",
+      "Sorting",
+      "Recursion",
+      "Memory Safety"
+    ]
+  },
+  {
+    "id": "R3-Q04",
+    "round": 3,
+    "language": "python",
+    "title": "Memoized DP Decorator State Leaking Across Test Instances",
+    "description": "Implement a memoized recursion for Longest Common Subsequence or Knapsack. Consecutive calls with different weights return stale cached results from previous tests.",
+    "bugDescription": "Memo cache dict is stored as class attribute or module-level default dict without clearing between independent runs.",
+    "buggyCode": "def memoize(fn):\n    # BUG: Cache persists indefinitely and doesn't handle unhashable or context keys\n    cache = {}\n    def wrapper(*args):\n        if args not in cache:\n            cache[args] = fn(*args)\n        return cache[args]\n    return wrapper\n\n@memoize\ndef min_coins(coins, target):\n    if target == 0:\n        return 0\n    if target < 0:\n        return float('inf')\n    # BUG: Coins tuple vs list hashing and infinity handling\n    return min([1 + min_coins(coins, target - c) for c in coins])\n\n# First query with small set\nans1 = min_coins((1, 2, 5), 11)\nprint(ans1)",
+    "correctSolution": "def memoize(fn):\n    cache = {}\n    def wrapper(coins, target):\n        key = (tuple(coins), target)\n        if key not in cache:\n            cache[key] = fn(coins, target)\n        return cache[key]\n    return wrapper\n\n@memoize\ndef min_coins(coins, target):\n    if target == 0:\n        return 0\n    if target < 0:\n        return float('inf')\n    res = float('inf')\n    for c in coins:\n        sub = min_coins(coins, target - c)\n        if sub != float('inf'):\n            res = min(res, 1 + sub)\n    return res\n\nans1 = min_coins((1, 2, 5), 11)\nprint(ans1)",
+    "expectedOutput": "3",
+    "marks": 20,
+    "difficulty": "Hard",
+    "timeLimitMinutes": 10,
+    "visibleTestCases": [
+      {
+        "id": "tc-r3-04-1",
+        "input": "",
+        "expectedOutput": "3",
+        "description": "Dynamic programming optimal coin count"
+      }
+    ],
+    "hiddenTestCases": [
+      {
+        "id": "tc-r3-04-h1",
+        "input": "",
+        "expectedOutput": "3",
+        "isHidden": true,
+        "description": "Memoization purity assertion"
+      }
+    ],
+    "isPublished": true,
+    "topics": [
+      "Dynamic Programming",
+      "Memoization",
+      "Decorators"
+    ]
+  },
+  {
+    "id": "R3-Q05",
+    "round": 3,
+    "language": "c",
+    "title": "Doubly Linked List LRU Cache Pointer Corruption on Eviction",
+    "description": "Implement node eviction in an LRU cache doubly linked list. When removing the tail node, `tail->prev->next` pointer is not nullified, causing memory corruption when subsequent nodes are added.",
+    "bugDescription": "Evict function fails to handle single-node edge case and leaves dangling pointers on previous tail node.",
+    "buggyCode": "#include <stdio.h>\n#include <stdlib.h>\n\ntypedef struct DNode {\n    int key;\n    int val;\n    struct DNode *prev;\n    struct DNode *next;\n} DNode;\n\ntypedef struct {\n    DNode *head;\n    DNode *tail;\n} LRUCache;\n\nvoid evictTail(LRUCache *cache) {\n    if (!cache->tail) return;\n    DNode *oldTail = cache->tail;\n    \n    // BUG: Omitting check for head == tail causes null pointer dereference\n    cache->tail = oldTail->prev;\n    // BUG: cache->tail is NULL if only 1 node, causing crash\n    cache->tail->next = NULL; \n    \n    free(oldTail);\n}\n\nint main() {\n    LRUCache cache = {NULL, NULL};\n    DNode *node = (DNode*)malloc(sizeof(DNode));\n    node->key = 1; node->val = 100;\n    node->prev = NULL; node->next = NULL;\n    cache.head = node;\n    cache.tail = node;\n    \n    // Evict the single node\n    evictTail(&cache);\n    \n    printf(\"Evicted successfully, head is %s\\n\", cache.tail == NULL ? \"NULL\" : \"CORRUPT\");\n    return 0;\n}",
+    "correctSolution": "#include <stdio.h>\n#include <stdlib.h>\n\ntypedef struct DNode {\n    int key;\n    int val;\n    struct DNode *prev;\n    struct DNode *next;\n} DNode;\n\ntypedef struct {\n    DNode *head;\n    DNode *tail;\n} LRUCache;\n\nvoid evictTail(LRUCache *cache) {\n    if (!cache->tail) return;\n    DNode *oldTail = cache->tail;\n    \n    if (cache->head == cache->tail) {\n        cache->head = NULL;\n        cache->tail = NULL;\n    } else {\n        cache->tail = oldTail->prev;\n        if (cache->tail) {\n            cache->tail->next = NULL;\n        }\n    }\n    \n    free(oldTail);\n}\n\nint main() {\n    LRUCache cache = {NULL, NULL};\n    DNode *node = (DNode*)malloc(sizeof(DNode));\n    node->key = 1; node->val = 100;\n    node->prev = NULL; node->next = NULL;\n    cache.head = node;\n    cache.tail = node;\n    \n    evictTail(&cache);\n    \n    printf(\"Evicted successfully, head is %s\\n\", cache.tail == NULL ? \"NULL\" : \"CORRUPT\");\n    return 0;\n}",
+    "expectedOutput": "Evicted successfully, head is NULL",
+    "marks": 20,
+    "difficulty": "Hard",
+    "timeLimitMinutes": 10,
+    "visibleTestCases": [
+      {
+        "id": "tc-r3-05-1",
+        "input": "",
+        "expectedOutput": "Evicted successfully, head is NULL",
+        "description": "Single node edge-case eviction"
+      }
+    ],
+    "hiddenTestCases": [
+      {
+        "id": "tc-r3-05-h1",
+        "input": "",
+        "expectedOutput": "Evicted successfully, head is NULL",
+        "isHidden": true,
+        "description": "Double linked list boundary pointer check"
+      }
+    ],
+    "isPublished": true,
+    "topics": [
+      "Data Structures",
+      "Doubly Linked List",
+      "Edge Cases",
+      "Pointers"
     ]
   }
 ]
