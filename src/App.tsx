@@ -1,4 +1,5 @@
 import React, { useState, useEffect } from 'react';
+import { Analytics } from '@vercel/analytics/react';
 import { useCompetitionStore } from './store/competitionStore';
 import { User, RoundConfig, Submission } from './types';
 import { Navbar } from './components/navbar/Navbar';
@@ -249,6 +250,9 @@ export default function App() {
           }}
         />
       )}
+
+      {/* Vercel Web Analytics */}
+      <Analytics />
 
     </div>
   );
