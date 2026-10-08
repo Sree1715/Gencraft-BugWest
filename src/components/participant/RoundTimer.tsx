@@ -20,6 +20,16 @@ export const RoundTimer: React.FC<RoundTimerProps> = ({
   const onTimeExpiredRef = useRef(onTimeExpired);
   onTimeExpiredRef.current = onTimeExpired;
 
+  // Local fallback start timestamp if endTime is null
+  const localTargetEndRef = useRef<number>(Date.now() + initialSeconds * 1000);
+
+  // Re-anchor fallback target when initialSeconds changes
+  useEffect(() => {
+    if (!endTime) {
+      localTargetEndRef.current = Date.now() + initialSeconds * 1000;
+    }
+  }, [initialSeconds, endTime]);
+
   const calculateSecondsLeft = (): number => {
     if (endTime) {
       const endMs = new Date(endTime).getTime();
@@ -27,7 +37,9 @@ export const RoundTimer: React.FC<RoundTimerProps> = ({
       const diffSec = Math.floor((endMs - nowMs) / 1000);
       return Math.max(0, diffSec);
     }
-    return initialSeconds;
+    // Fallback based on local anchor
+    const diffSec = Math.floor((localTargetEndRef.current - Date.now()) / 1000);
+    return Math.max(0, diffSec);
   };
 
   const [secondsLeft, setSecondsLeft] = useState<number>(calculateSecondsLeft);
@@ -45,8 +57,8 @@ export const RoundTimer: React.FC<RoundTimerProps> = ({
     if (isPaused) return;
 
     const initial = calculateSecondsLeft();
-    if (initial <= 0) {
-      // If already expired at mount, don't repeatedly trigger
+    if (initial <= 0 && endTime) {
+      // If already expired at mount, trigger once
       if (!hasFiredRef.current) {
         hasFiredRef.current = true;
       }

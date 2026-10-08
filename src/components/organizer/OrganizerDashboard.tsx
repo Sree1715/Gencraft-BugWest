@@ -783,6 +783,58 @@ export const OrganizerDashboard: React.FC<OrganizerDashboardProps> = ({
               </p>
             </div>
 
+            {/* ACTIVE ROUND SPOTLIGHT BANNER (Requirement 7) */}
+            {(() => {
+              const activeRound = rounds.find((r) => r.status === 'active') || rounds[0];
+              return (
+                <div className="bg-gradient-to-r from-slate-900 via-blue-950 to-slate-900 text-white rounded-2xl p-6 shadow-md border border-slate-800">
+                  <div className="flex flex-col md:flex-row md:items-center justify-between gap-6">
+                    <div>
+                      <div className="flex items-center gap-2 mb-2">
+                        <span className="w-2.5 h-2.5 rounded-full bg-emerald-400 animate-pulse"></span>
+                        <span className="text-[11px] font-bold uppercase tracking-widest text-emerald-400 font-mono">
+                          ACTIVE COMPETITION ROUND
+                        </span>
+                      </div>
+                      <h2 className="text-2xl font-black tracking-tight text-white mb-1">
+                        {activeRound.title}: {activeRound.subtitle}
+                      </h2>
+                      <p className="text-xs text-slate-300 max-w-xl leading-relaxed">
+                        Provide the generated Bugfest Code below to participating teams through the organizing coordination desk.
+                      </p>
+                    </div>
+
+                    <div className="bg-white/10 backdrop-blur-md border border-white/20 p-4 rounded-xl flex flex-col items-start gap-2">
+                      <span className="text-[10px] uppercase font-bold tracking-wider text-slate-300 font-mono">
+                        ROUND {activeRound.roundId} BUGFEST CODE
+                      </span>
+                      <div className="flex items-center gap-2">
+                        <span className="text-xl font-black font-mono tracking-widest text-amber-300">
+                          {activeRound.bugfestCode || 'NO CODE ACTIVE'}
+                        </span>
+                        {activeRound.bugfestCode && (
+                          <button
+                            onClick={() => {
+                              navigator.clipboard.writeText(activeRound.bugfestCode!);
+                              setCopiedCode(activeRound.bugfestCode!);
+                              setTimeout(() => setCopiedCode(null), 1500);
+                            }}
+                            className="p-1.5 bg-white/20 hover:bg-white/30 text-white rounded-lg transition-colors"
+                            title="Copy Code"
+                          >
+                            <Copy className="w-4 h-4" />
+                          </button>
+                        )}
+                        {copiedCode === activeRound.bugfestCode && (
+                          <span className="text-[10px] text-emerald-300 font-bold">Copied!</span>
+                        )}
+                      </div>
+                    </div>
+                  </div>
+                </div>
+              );
+            })()}
+
             <div className="space-y-4">
               {rounds.map((round) => {
                 const questionCountInRound = questions.filter((q) => q.round === round.roundId).length;
@@ -807,12 +859,18 @@ export const OrganizerDashboard: React.FC<OrganizerDashboardProps> = ({
                         {(['locked', 'ready', 'active', 'completed'] as const).map((st) => (
                           <button
                             key={st}
-                            onClick={() => onUpdateRound(round.roundId, { status: st })}
+                            onClick={() => {
+                              const updates: Partial<RoundConfig> = { status: st };
+                              if (st === 'active' && !round.bugfestCode) {
+                                updates.bugfestCode = competitionStore.generateOrRegenerateRoundCode(round.roundId);
+                              }
+                              onUpdateRound(round.roundId, updates);
+                            }}
                             className={`px-3 py-1.5 text-xs font-bold rounded-lg uppercase transition-colors ${
                               round.status === st
-                                ? st === 'active' ? 'bg-emerald-600 text-white' :
-                                  st === 'ready' ? 'bg-blue-600 text-white' :
-                                  st === 'completed' ? 'bg-purple-600 text-white' :
+                                ? st === 'active' ? 'bg-emerald-600 text-white shadow-xs' :
+                                  st === 'ready' ? 'bg-blue-600 text-white shadow-xs' :
+                                  st === 'completed' ? 'bg-purple-600 text-white shadow-xs' :
                                   'bg-slate-900 text-white'
                                 : 'bg-slate-100 text-slate-600 hover:bg-slate-200'
                             }`}
@@ -865,8 +923,73 @@ export const OrganizerDashboard: React.FC<OrganizerDashboardProps> = ({
                       </div>
                     </div>
 
+                    {/* Live Synchronized Timer Controller */}
+                    <div className="mt-4 pt-4 border-t border-slate-100 flex flex-col sm:flex-row sm:items-center justify-between gap-3 bg-blue-50/50 p-3.5 rounded-lg border border-blue-200">
+                      <div>
+                        <div className="flex items-center gap-2 mb-0.5">
+                          <Clock className="w-3.5 h-3.5 text-blue-700" />
+                          <span className="text-xs font-bold text-slate-900">
+                            Tournament Clock & Global Countdown:
+                          </span>
+                          {round.status === 'active' && round.endTime && new Date(round.endTime).getTime() > Date.now() ? (
+                            <span className="text-[10px] font-mono font-bold px-2 py-0.5 rounded-full bg-emerald-100 text-emerald-800 animate-pulse">
+                              LIVE COUNTDOWN RUNNING
+                            </span>
+                          ) : round.status === 'active' ? (
+                            <span className="text-[10px] font-mono font-bold px-2 py-0.5 rounded-full bg-amber-100 text-amber-800">
+                              TIMER READY / EXPIRED
+                            </span>
+                          ) : (
+                            <span className="text-[10px] font-mono font-bold px-2 py-0.5 rounded-full bg-slate-200 text-slate-700 uppercase">
+                              {round.status}
+                            </span>
+                          )}
+                        </div>
+                        <p className="text-[11px] text-slate-500">
+                          All participants share the exact same synchronized countdown regardless of when they enter.
+                        </p>
+                      </div>
+
+                      <div className="flex items-center gap-2">
+                        <button
+                          onClick={() => {
+                            if (window.confirm(`Start / Reset synchronized ${round.durationMinutes}-minute countdown for Round ${round.roundId} for all participants?`)) {
+                              onUpdateRound(round.roundId, { action: 'restart_timer', status: 'active', durationMinutes: round.durationMinutes } as any);
+                            }
+                          }}
+                          className="px-3 py-1.5 bg-blue-600 hover:bg-blue-700 active:bg-blue-800 text-white font-bold text-xs rounded-lg transition-colors flex items-center gap-1.5 shadow-2xs whitespace-nowrap"
+                        >
+                          <Clock className="w-3 h-3" />
+                          <span>Start / Reset Timer ({round.durationMinutes}m)</span>
+                        </button>
+
+                        {round.status === 'active' && (
+                          <>
+                            <button
+                              onClick={() => {
+                                onUpdateRound(round.roundId, { action: 'extend_timer', extendMinutes: 5 } as any);
+                              }}
+                              className="px-2.5 py-1.5 bg-slate-900 hover:bg-slate-800 text-white font-bold text-xs rounded-lg transition-colors whitespace-nowrap"
+                              title="Add 5 Minutes to Round Clock"
+                            >
+                              +5 Min
+                            </button>
+                            <button
+                              onClick={() => {
+                                onUpdateRound(round.roundId, { action: 'extend_timer', extendMinutes: 10 } as any);
+                              }}
+                              className="px-2.5 py-1.5 bg-slate-900 hover:bg-slate-800 text-white font-bold text-xs rounded-lg transition-colors whitespace-nowrap"
+                              title="Add 10 Minutes to Round Clock"
+                            >
+                              +10 Min
+                            </button>
+                          </>
+                        )}
+                      </div>
+                    </div>
+
                     {/* Bugfest Code for Round */}
-                    <div className="mt-4 pt-4 border-t border-slate-100 flex flex-col sm:flex-row sm:items-center justify-between gap-3 bg-slate-50 p-3.5 rounded-lg border border-slate-200">
+                    <div className="mt-3 pt-3 border-t border-slate-100 flex flex-col sm:flex-row sm:items-center justify-between gap-3 bg-slate-50 p-3.5 rounded-lg border border-slate-200">
                       <div>
                         <div className="flex items-center gap-2 mb-0.5">
                           <Key className="w-3.5 h-3.5 text-blue-600" />
@@ -875,7 +998,7 @@ export const OrganizerDashboard: React.FC<OrganizerDashboardProps> = ({
                           </span>
                         </div>
                         <p className="text-[11px] text-slate-500">
-                          Provide this code to participating teams along with their team name to authorize arena entry.
+                          Generated randomly server-side. Provide manually to participating teams for Round {round.roundId}.
                         </p>
                       </div>
 
@@ -904,13 +1027,19 @@ export const OrganizerDashboard: React.FC<OrganizerDashboardProps> = ({
 
                         <button
                           onClick={() => {
+                            if (round.bugfestCode) {
+                              const confirmed = window.confirm(
+                                `⚠️ WARNING: Regenerating the Bugfest Code for Round ${round.roundId} will immediately invalidate the previous code.\n\nAll participating teams must receive the replacement code to authenticate.\n\nExisting submissions, scores, and completed progress will NOT be altered.\n\nDo you want to proceed with regeneration?`
+                              );
+                              if (!confirmed) return;
+                            }
                             const newCode = competitionStore.generateOrRegenerateRoundCode(round.roundId);
                             onUpdateRound(round.roundId, { bugfestCode: newCode });
                           }}
-                          className="px-3 py-1.5 bg-slate-900 hover:bg-blue-600 text-white font-bold text-xs rounded-lg transition-colors flex items-center gap-1.5 whitespace-nowrap"
+                          className="px-3.5 py-1.5 bg-slate-900 hover:bg-blue-600 text-white font-bold text-xs rounded-lg transition-colors flex items-center gap-1.5 whitespace-nowrap shadow-2xs"
                         >
-                          <Sparkles className="w-3 h-3 text-amber-300" />
-                          <span>{round.bugfestCode ? 'Regenerate Code' : 'Generate Random Code'}</span>
+                          <Sparkles className="w-3.5 h-3.5 text-amber-300" />
+                          <span>{round.bugfestCode ? 'Regenerate Code' : 'GENERATE BUGFEST CODE'}</span>
                         </button>
                       </div>
                     </div>

@@ -78,7 +78,7 @@ export const Navbar: React.FC<NavbarProps> = ({
             </button>
           )}
 
-          {currentUser && (
+          {currentUser?.role === 'organizer' && (
             <button
               onClick={() => onNavigate('leaderboard')}
               className={`flex items-center gap-1.5 transition-colors hover:text-slate-900 ${
@@ -86,7 +86,7 @@ export const Navbar: React.FC<NavbarProps> = ({
               }`}
             >
               <Trophy className="w-4 h-4 text-amber-500" />
-              <span>Live Leaderboard</span>
+              <span>Scoreboard & Rankings</span>
             </button>
           )}
         </nav>

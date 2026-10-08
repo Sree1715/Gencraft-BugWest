@@ -254,32 +254,38 @@ app.get('/api/rounds', (req, res) => {
 app.patch('/api/rounds/:id', (req, res) => {
   try {
     const roundId = parseInt(req.params.id, 10);
-    const { action, status, durationMinutes, joinCode, startTime, endTime } = req.body;
+    const { action, status, durationMinutes, joinCode, startTime, endTime, extendMinutes } = req.body;
 
     const currentRound = db.prepare('SELECT * FROM rounds WHERE id = ?').get(roundId);
     if (!currentRound) {
       return res.status(404).json({ error: 'Round not found.' });
     }
 
-    let newStatus = currentRound.status;
-    let newStartTime = currentRound.start_time;
-    let newEndTime = currentRound.end_time;
-    let newDuration = currentRound.duration_minutes;
+    let newStatus = status !== undefined ? status : currentRound.status;
+    let newStartTime = startTime || currentRound.start_time;
+    let newEndTime = endTime || currentRound.end_time;
+    let newDuration = durationMinutes !== undefined && durationMinutes > 0 ? durationMinutes : currentRound.duration_minutes;
     let newJoinCode = currentRound.join_code;
-
-    if (durationMinutes !== undefined && durationMinutes > 0) {
-      newDuration = durationMinutes;
-    }
 
     if (joinCode && joinCode.trim()) {
       newJoinCode = joinCode.trim().toUpperCase();
     }
 
-    if (action === 'start' || status === 'active') {
+    const now = new Date();
+
+    if (action === 'start' || action === 'start_timer' || action === 'restart_timer' || (status === 'active' && currentRound.status !== 'active')) {
       newStatus = 'active';
-      const now = new Date();
       newStartTime = startTime || now.toISOString();
       newEndTime = endTime || new Date(now.getTime() + newDuration * 60 * 1000).toISOString();
+    } else if (action === 'extend_timer' || extendMinutes) {
+      const mins = Number(extendMinutes || 5);
+      const baseEnd = newEndTime ? new Date(newEndTime).getTime() : now.getTime();
+      const effectiveBase = baseEnd > now.getTime() ? baseEnd : now.getTime();
+      newEndTime = new Date(effectiveBase + mins * 60 * 1000).toISOString();
+    } else if (durationMinutes !== undefined && newStatus === 'active') {
+      // Recalculate end_time if duration changed while active
+      const baseStart = newStartTime ? new Date(newStartTime).getTime() : now.getTime();
+      newEndTime = new Date(baseStart + newDuration * 60 * 1000).toISOString();
     } else if (action === 'end' || action === 'complete' || status === 'completed') {
       newStatus = 'completed';
     } else if (action === 'lock' || status === 'locked') {
