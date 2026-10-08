@@ -15,6 +15,7 @@ import { QuestionModal } from './QuestionModal';
 import { SubmissionInspectorModal } from './SubmissionInspectorModal';
 import { ParticipantDetailModal } from './ParticipantDetailModal';
 import { 
+  Download,
   LayoutDashboard, 
   Users, 
   Key, 
