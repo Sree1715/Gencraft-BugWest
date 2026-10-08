@@ -56,9 +56,9 @@ export const SAMPLE_USERS: Record<string, { user: User; passwordHash: string }> 
       id: 'usr-org001',
       userId: 'ORG001',
       accessCode: 'ORG-9999',
-      name: 'Prof. K. Ramanathan',
+      name: 'Event Coordinator',
       role: 'organizer',
-      college: 'Gencraft Steering Committee',
+      college: 'BugFest Organizing Committee',
       avatar: 'https://api.dicebear.com/7.x/bottts/svg?seed=Organizer'
     },
     passwordHash: 'admin123'
@@ -69,38 +69,14 @@ const DEFAULT_ROUNDS: RoundConfig[] = [
   {
     roundId: 1,
     title: 'ROUND 1',
-    subtitle: 'Basic Debugging',
-    description: 'Find basic syntax flaws, uninitialized variables, indentation errors, and simple logic bugs in C & Python.',
-    durationMinutes: 20,
-    totalMarks: 100,
-    questionCount: 20,
+    subtitle: 'Championship Debugging Arena',
+    description: 'Find basic syntax flaws, uninitialized variables, indentation errors, and logic bugs in C & Python.',
+    durationMinutes: 30,
+    totalMarks: 35,
+    questionCount: 7,
     status: 'active',
     allowedLanguage: 'all',
     bugfestCode: 'BF-R1-8K9M3P'
-  },
-  {
-    roundId: 2,
-    title: 'ROUND 2',
-    subtitle: 'Core Programming & Debugging',
-    description: 'Pointers, dynamic memory, structs, list references, recursion, custom exceptions, and algorithms.',
-    durationMinutes: 25,
-    totalMarks: 100,
-    questionCount: 10,
-    status: 'locked',
-    allowedLanguage: 'all',
-    bugfestCode: 'BF-R2-7X4W9Q'
-  },
-  {
-    roundId: 3,
-    title: 'ROUND 3',
-    subtitle: 'Advanced Professional Debugging',
-    description: 'Double free, dangling pointers, MRO diamond inheritance, underflow partitioning, and memory corruption.',
-    durationMinutes: 30,
-    totalMarks: 100,
-    questionCount: 5,
-    status: 'locked',
-    allowedLanguage: 'all',
-    bugfestCode: 'BF-R3-5N2J8L'
   }
 ];
 
@@ -221,7 +197,17 @@ export const competitionStore = {
 
   // Questions
   getQuestions(): Question[] {
-    return cachedQuestions || INITIAL_QUESTIONS;
+    const rawQuestions = cachedQuestions || INITIAL_QUESTIONS;
+    const r1 = this.getRound(1);
+    const roundTotalMarks = r1?.totalMarks ?? 35;
+    const r1Questions = rawQuestions.filter((q) => q.round === 1);
+    const count = r1Questions.length || 7;
+    const splitMarks = Math.max(1, Math.round(roundTotalMarks / count));
+
+    return rawQuestions.map((q) => ({
+      ...q,
+      marks: q.round === 1 ? splitMarks : (q.marks || 5)
+    }));
   },
 
   getQuestionsByRound(round: 1 | 2 | 3): Question[] {
@@ -310,16 +296,23 @@ export const competitionStore = {
     }
     // Send to backend DB
     const res = await apiClient.updateRound(roundId, payload);
-    if (res.success && res.round) {
-      const updatedRound = res.round;
-      // Merge the updated round, preserving bugfestCode from updates
-      cachedRounds = cachedRounds.map((r) =>
-        r.roundId === roundId
-          ? { ...r, ...updatedRound, bugfestCode: updates.bugfestCode ?? updatedRound.bugfestCode ?? r.bugfestCode }
-          : r
+    const updatedRound = res.success && res.round ? res.round : updates;
+    cachedRounds = (cachedRounds || DEFAULT_ROUNDS).map((r) =>
+      r.roundId === roundId
+        ? { ...r, ...updatedRound, bugfestCode: updates.bugfestCode ?? (updatedRound as any).bugfestCode ?? r.bugfestCode }
+        : r
+    );
+
+    // If totalMarks changed, dynamically re-split question marks
+    if (updates.totalMarks !== undefined) {
+      const targetQuestions = cachedQuestions || INITIAL_QUESTIONS;
+      const count = targetQuestions.filter((q) => q.round === roundId).length || 7;
+      const splitMarks = Math.max(1, Math.round(updates.totalMarks / count));
+      cachedQuestions = targetQuestions.map((q) =>
+        q.round === roundId ? { ...q, marks: splitMarks } : q
       );
-      emitter.notify();
     }
+    emitter.notify();
   },
 
   // Access Codes

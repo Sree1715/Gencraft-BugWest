@@ -25,10 +25,8 @@ export const exportToExcel = async (data: LeaderboardEntry[]) => {
       'Participant / Team Name': entry.participantName,
       'Team ID': entry.userId,
       'Department / College': entry.college || '',
-      'Round 1 Score': entry.round1Score,
-      'Round 2 Score': entry.round2Score,
-      'Round 3 Score': entry.round3Score,
-      'Overall / Cumulative Score': entry.totalScore,
+      'Round 1 Score': entry.round1Score ?? entry.totalScore,
+      'Overall Score': entry.totalScore,
       'Accuracy (%)': entry.accuracy,
       'Questions Solved': entry.questionsSolved,
       'Status': entry.status,
@@ -36,28 +34,19 @@ export const exportToExcel = async (data: LeaderboardEntry[]) => {
 
     const wb = XLSX.utils.book_new();
     const ws = XLSX.utils.json_to_sheet(formattedData);
-    XLSX.utils.book_append_sheet(wb, ws, 'Overall Cumulative Leaderboard');
+    XLSX.utils.book_append_sheet(wb, ws, 'Official Leaderboard');
     
-    [1, 2, 3].forEach(round => {
-      const roundData = data.map(entry => {
-          let rScore = 0;
-          if(round === 1) rScore = entry.round1Score;
-          else if(round === 2) rScore = entry.round2Score;
-          else if(round === 3) rScore = entry.round3Score;
-          
-          return {
-            'Rank': entry.rank,
-            'Participant / Team Name': entry.participantName,
-            'Team ID': entry.userId,
-            'Department / College': entry.college || '',
-            [`Round ${round} Score`]: rScore,
-          };
-      }).sort((a, b) => b[`Round ${round} Score`] - a[`Round ${round} Score`])
-        .map((item, idx) => ({ 'Round Rank': idx + 1, ...item }));
-      
-      const rws = XLSX.utils.json_to_sheet(roundData);
-      XLSX.utils.book_append_sheet(wb, rws, `Round ${round} Leaderboard`);
-    });
+    const roundData = data.map(entry => ({
+      'Rank': entry.rank,
+      'Participant / Team Name': entry.participantName,
+      'Team ID': entry.userId,
+      'Department / College': entry.college || '',
+      'Score': entry.round1Score ?? entry.totalScore,
+    })).sort((a, b) => Number(b['Score']) - Number(a['Score']))
+      .map((item, idx) => ({ 'Round Rank': idx + 1, ...item }));
+    
+    const rws = XLSX.utils.json_to_sheet(roundData);
+    XLSX.utils.book_append_sheet(wb, rws, 'Round 1 Leaderboard');
 
     XLSX.writeFile(wb, 'BugFest_Leaderboard.xlsx');
   } catch (error) {
@@ -80,15 +69,14 @@ export const exportToPDF = async (data: LeaderboardEntry[]) => {
     doc.setFontSize(12);
     doc.text('Official Leaderboard Results', 14, 30);
     
-    const head = [['Rank', 'Participant', 'R1', 'R2', 'R3', 'Total Score', 'Accuracy']];
+    const head = [['Rank', 'Participant / Team', 'Score', 'Questions Solved', 'Accuracy', 'Status']];
     const body = data.map(entry => [
       entry.rank,
       entry.participantName,
-      entry.round1Score,
-      entry.round2Score,
-      entry.round3Score,
-      entry.totalScore,
-      entry.accuracy + '%'
+      entry.round1Score ?? entry.totalScore,
+      entry.questionsSolved,
+      entry.accuracy + '%',
+      entry.status
     ]);
 
     (doc as any).autoTable({

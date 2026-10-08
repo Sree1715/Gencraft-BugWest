@@ -1,9 +1,4 @@
-const Database = require('better-sqlite3');
-const path = require('path');
-const INITIAL_QUESTIONS = require('./server/questionsData.json');
-
-const dbPath = process.env.DB_PATH || path.join(__dirname, 'bugwest.db');
-const db = new Database(dbPath);
+const db = require('./server/db.cjs');
 
 console.log('Clearing existing answers and questions...');
 db.exec('DELETE FROM answers;');

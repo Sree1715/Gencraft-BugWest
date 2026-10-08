@@ -1,15 +1,53 @@
-const Database = require('better-sqlite3');
 const path = require('path');
 const INITIAL_QUESTIONS = require('./questionsData.json');
 
 // DB_PATH env var lets Docker point the database at the mounted volume (/data/bugwest.db).
 // Falls back to the repo-local path for local development.
 const dbPath = process.env.DB_PATH || path.join(__dirname, '..', 'bugwest.db');
-const db = new Database(dbPath);
 
+let db;
 
-// Enable WAL mode for high concurrency
-db.pragma('journal_mode = WAL');
+try {
+  const Database = require('better-sqlite3');
+  db = new Database(dbPath);
+  db.pragma('journal_mode = WAL');
+  console.log('[Database] Loaded SQLite via better-sqlite3');
+} catch (err) {
+  try {
+    const { DatabaseSync } = require('node:sqlite');
+    const rawDb = new DatabaseSync(dbPath);
+    try { rawDb.exec('PRAGMA journal_mode = WAL;'); } catch (e) {}
+
+    class StatementWrapper {
+      constructor(stmt) {
+        this._stmt = stmt;
+      }
+      get(...args) {
+        if (args.length === 1 && Array.isArray(args[0])) return this._stmt.get(...args[0]);
+        return this._stmt.get(...args);
+      }
+      all(...args) {
+        if (args.length === 1 && Array.isArray(args[0])) return this._stmt.all(...args[0]);
+        return this._stmt.all(...args);
+      }
+      run(...args) {
+        if (args.length === 1 && Array.isArray(args[0])) return this._stmt.run(...args[0]);
+        return this._stmt.run(...args);
+      }
+    }
+
+    db = {
+      prepare: (sql) => new StatementWrapper(rawDb.prepare(sql)),
+      exec: (sql) => rawDb.exec(sql),
+      pragma: (sql) => { try { rawDb.exec(`PRAGMA ${sql};`); } catch (e) {} },
+      close: () => rawDb.close(),
+    };
+    console.log('[Database] Loaded SQLite via native node:sqlite');
+  } catch (fallbackErr) {
+    console.error('Failed to initialize database with better-sqlite3 or node:sqlite:', fallbackErr);
+    throw fallbackErr;
+  }
+}
 
 // Initialize schema
 db.exec(`
@@ -35,7 +73,8 @@ db.exec(`
     join_code TEXT NOT NULL UNIQUE,
     start_time TEXT,
     end_time TEXT,
-    duration_minutes INTEGER NOT NULL DEFAULT 20,
+    duration_minutes INTEGER NOT NULL DEFAULT 30,
+    total_marks INTEGER NOT NULL DEFAULT 35,
     status TEXT NOT NULL DEFAULT 'locked'
   );
 
@@ -99,28 +138,46 @@ if (eventCount === 0) {
   );
 }
 
-// Seed default Rounds if missing
-const roundCount = db.prepare('SELECT COUNT(*) as cnt FROM rounds').get().cnt;
-if (roundCount === 0) {
-  const insertRound = db.prepare(`
-    INSERT INTO rounds (id, event_id, round_number, round_name, join_code, duration_minutes, status)
-    VALUES (?, ?, ?, ?, ?, ?, ?)
-  `);
+// Ensure total_marks column exists
+try {
+  db.exec('ALTER TABLE rounds ADD COLUMN total_marks INTEGER DEFAULT 35');
+} catch (e) {}
 
-  insertRound.run(1, 'evt-bugwest-2026', 1, 'ROUND 1 - Basic Debugging', 'BF-R1-8K9M3P', 20, 'active');
-  insertRound.run(2, 'evt-bugwest-2026', 2, 'ROUND 2 - Core Programming & Debugging', 'BF-R2-7X4W9Q', 25, 'locked');
-  insertRound.run(3, 'evt-bugwest-2026', 3, 'ROUND 3 - Advanced Professional Debugging', 'BF-R3-5N2J8L', 30, 'locked');
+// Consolidate to 1 single round with 7 questions
+try {
+  db.prepare('DELETE FROM rounds WHERE round_number > 1').run();
+} catch (e) {}
+
+const r1 = db.prepare('SELECT * FROM rounds WHERE round_number = 1').get();
+if (!r1) {
+  const insertRound = db.prepare(`
+    INSERT INTO rounds (id, event_id, round_number, round_name, join_code, duration_minutes, total_marks, status)
+    VALUES (?, ?, ?, ?, ?, ?, ?, ?)
+  `);
+  insertRound.run(1, 'evt-bugwest-2026', 1, 'ROUND 1 - BugFest Technical Arena', 'BF-R1-8K9M3P', 30, 35, 'active');
+} else {
+  db.prepare(`
+    UPDATE rounds 
+    SET round_name = 'ROUND 1 - BugFest Technical Arena',
+        duration_minutes = 30,
+        total_marks = COALESCE(total_marks, 35)
+    WHERE round_number = 1
+  `).run();
 }
 
-// Seed Questions if missing
-const questionCount = db.prepare('SELECT COUNT(*) as cnt FROM questions').get().cnt;
-if (questionCount === 0 && INITIAL_QUESTIONS && INITIAL_QUESTIONS.length > 0) {
-  const insertQ = db.prepare(`
-    INSERT INTO questions (id, round, title, language, difficulty, points, bug_description, buggy_code, hint, test_cases)
+// Seed/Sync the 7 questions
+if (INITIAL_QUESTIONS && INITIAL_QUESTIONS.length > 0) {
+  const allowedIds = INITIAL_QUESTIONS.map(q => `'${q.id}'`).join(',');
+  try {
+    db.prepare(`DELETE FROM questions WHERE id NOT IN (${allowedIds}) OR round > 1`).run();
+  } catch (e) {}
+
+  const insertOrReplaceQ = db.prepare(`
+    INSERT OR REPLACE INTO questions (id, round, title, language, difficulty, points, bug_description, buggy_code, hint, test_cases)
     VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
   `);
   for (const q of INITIAL_QUESTIONS) {
-    insertQ.run(
+    insertOrReplaceQ.run(
       q.id,
       q.round,
       q.title,

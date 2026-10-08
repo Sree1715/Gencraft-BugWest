@@ -73,7 +73,7 @@ export const LandingPage: React.FC<LandingPageProps> = ({
 
             <p className="text-base text-slate-500 mb-8 max-w-2xl mx-auto leading-relaxed text-balance">
               The premier collegiate technical debugging championship. Test your analytical acumen across 
-              three high-stakes rounds designed to uncover subtle memory leaks, logic traps, and syntax pitfalls in C and Python.
+              7 curated debugging challenges designed to uncover subtle memory traps, logic errors, and syntax pitfalls in C and Python.
             </p>
 
             <div className="flex flex-col sm:flex-row items-center justify-center gap-4">
@@ -111,7 +111,7 @@ export const LandingPage: React.FC<LandingPageProps> = ({
             </h2>
             <p className="mt-3 text-slate-600 leading-relaxed">
               Writing new code is only half the craft. In high-performance engineering environments, finding 
-              subtle off-by-one errors, race conditions, dangling pointers, and type misalignments under time pressure 
+              subtle off-by-one errors, race conditions, uninitialized variables, and type misalignments under time pressure 
               is the true test of deep computer science logic.
             </p>
           </div>
@@ -126,8 +126,8 @@ export const LandingPage: React.FC<LandingPageProps> = ({
                 Authentic Bug Vectors
               </h3>
               <p className="text-sm text-slate-600 leading-relaxed">
-                Problems are carefully drafted based on real production bugs: uninitialized memory, dangling pointers, 
-                dangling elses, mutable default arguments, and MRO resolution errors.
+                Problems are carefully drafted based on real coding flaws: pointer swapping, integer division truncation, 
+                binary search partitions, loop boundaries, if-else precedence, and recursion.
               </p>
             </div>
 
@@ -139,8 +139,8 @@ export const LandingPage: React.FC<LandingPageProps> = ({
                 In-Browser Code Arena
               </h3>
               <p className="text-sm text-slate-600 leading-relaxed">
-                Integrated browser editor with syntax highlighting, line numbers, test execution console, and 
-                controlled execution without exposing hidden regression vectors.
+                Integrated browser editor with syntax highlighting, line numbers, live test case execution console, 
+                and automated progression to the next problem upon submission.
               </p>
             </div>
 
@@ -149,11 +149,11 @@ export const LandingPage: React.FC<LandingPageProps> = ({
                 <Clock className="w-5 h-5" />
               </div>
               <h3 className="text-base font-bold text-slate-900 mb-2">
-                Live Organizer Control
+                Dynamic Marks & Control
               </h3>
               <p className="text-sm text-slate-600 leading-relaxed">
-                Organizers retain complete sovereignty: adjust round timers live, author custom bugs, 
-                inspect code diffs, and control progression gates between rounds.
+                Organizers retain complete sovereignty: adjust round timers, set total marks with automatic even splitting 
+                across all questions, monitor real-time scoreboards, and issue event access codes.
               </p>
             </div>
 
@@ -162,7 +162,7 @@ export const LandingPage: React.FC<LandingPageProps> = ({
         </div>
       </section>
 
-      {/* 3 Competition Rounds Breakdown */}
+      {/* Competition Arena Breakdown */}
       <section className="py-16 md:py-24 border-b border-slate-200 bg-slate-50/40">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           
@@ -171,154 +171,109 @@ export const LandingPage: React.FC<LandingPageProps> = ({
               Tournament Structure
             </span>
             <h2 className="text-2xl sm:text-3xl font-bold tracking-tight text-slate-900">
-              Three Rigorous Competition Rounds
+              BugFest Technical Arena (7 Questions)
             </h2>
             <p className="mt-2 text-sm text-slate-600">
-              Candidates progress sequentially from foundational syntax traps to professional memory anomalies.
+              A single championship round with 7 curated problems spanning foundational to intermediate C and Python debugging.
             </p>
           </div>
 
-          <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
-            
-            {/* Round 1 */}
-            <div className="bg-white rounded-xl border border-slate-200 shadow-2xs p-6 flex flex-col justify-between hover:border-blue-300 transition-all">
+          <div className="max-w-4xl mx-auto bg-white rounded-2xl border-2 border-blue-600/30 shadow-sm p-6 sm:p-8">
+            <div className="flex flex-col sm:flex-row sm:items-center justify-between pb-6 mb-6 border-b border-slate-200 gap-4">
               <div>
-                <div className="flex items-center justify-between mb-4">
-                  <span className="text-xs font-bold tracking-wider text-blue-700 bg-blue-50 px-2.5 py-1 rounded">
-                    ROUND 1
-                  </span>
-                  <span className="text-xs font-semibold text-slate-500 font-mono">
-                    20 Questions · 100 Marks
-                  </span>
-                </div>
-                
-                <h3 className="text-lg font-bold text-slate-900 mb-1">
-                  Basic Debugging
+                <span className="text-xs font-bold tracking-wider text-blue-700 bg-blue-50 px-2.5 py-1 rounded">
+                  OFFICIAL ARENA ROUND
+                </span>
+                <h3 className="text-xl font-extrabold text-slate-900 mt-2">
+                  Round 1: C & Python Debugging Championship
                 </h3>
-                <p className="text-xs text-slate-500 mb-4">
-                  Quick identification of syntax and introductory logic flaws.
+                <p className="text-xs text-slate-500 mt-1">
+                  Duration: 30 Minutes · Total Marks: 35 (5 Marks / Question, organizer-adjustable)
                 </p>
-
-                <div className="space-y-2 border-t border-slate-100 pt-4 text-xs text-slate-600">
-                  <div className="flex items-center gap-2">
-                    <CheckCircle2 className="w-3.5 h-3.5 text-blue-600 shrink-0" />
-                    <span>For and While Loop condition flaws</span>
-                  </div>
-                  <div className="flex items-center gap-2">
-                    <CheckCircle2 className="w-3.5 h-3.5 text-blue-600 shrink-0" />
-                    <span>Missing semicolons & uninitialized variables</span>
-                  </div>
-                  <div className="flex items-center gap-2">
-                    <CheckCircle2 className="w-3.5 h-3.5 text-blue-600 shrink-0" />
-                    <span>Python indentation & string immutability</span>
-                  </div>
-                  <div className="flex items-center gap-2">
-                    <CheckCircle2 className="w-3.5 h-3.5 text-blue-600 shrink-0" />
-                    <span>Dangling else & operator precedence</span>
-                  </div>
-                </div>
               </div>
 
-              <div className="mt-6 pt-4 border-t border-slate-100 flex items-center justify-between text-xs text-slate-500 font-mono">
-                <span>Format: C & Python</span>
-                <span>Speed: Fast-Paced</span>
+              <div className="flex items-center gap-2">
+                <span className="px-3 py-1.5 bg-slate-900 text-white text-xs font-mono font-bold rounded-lg">
+                  7 Questions
+                </span>
+                <span className="px-3 py-1.5 bg-emerald-50 text-emerald-800 border border-emerald-200 text-xs font-mono font-bold rounded-lg">
+                  C & Python
+                </span>
               </div>
             </div>
 
-            {/* Round 2 */}
-            <div className="bg-white rounded-xl border-2 border-blue-600 shadow-sm p-6 flex flex-col justify-between relative">
-              <div className="absolute -top-3 right-6 bg-blue-600 text-white text-[11px] font-bold px-2.5 py-0.5 rounded-full uppercase tracking-wider">
-                Core Qualifier
-              </div>
-
-              <div>
-                <div className="flex items-center justify-between mb-4">
-                  <span className="text-xs font-bold tracking-wider text-indigo-700 bg-indigo-50 px-2.5 py-1 rounded">
-                    ROUND 2
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+              {/* C Questions Track */}
+              <div className="bg-slate-50/60 p-4 rounded-xl border border-slate-200">
+                <div className="flex items-center justify-between mb-3">
+                  <span className="text-xs font-bold text-slate-900 uppercase tracking-wider font-mono">
+                    C Challenges (3 Questions)
                   </span>
-                  <span className="text-xs font-semibold text-slate-500 font-mono">
-                    10 Questions · 100 Marks
-                  </span>
+                  <span className="text-[10px] font-bold px-2 py-0.5 rounded bg-blue-100 text-blue-800">C</span>
                 </div>
-
-                <h3 className="text-lg font-bold text-slate-900 mb-1">
-                  Core Programming & Debugging
-                </h3>
-                <p className="text-xs text-slate-500 mb-4">
-                  Structural algorithms, pointer math, and data structure bugs.
-                </p>
-
-                <div className="space-y-2 border-t border-slate-100 pt-4 text-xs text-slate-600">
-                  <div className="flex items-center gap-2">
-                    <CheckCircle2 className="w-3.5 h-3.5 text-indigo-600 shrink-0" />
-                    <span>Pointer dereferencing & address swap errors</span>
+                <div className="space-y-2.5 text-xs text-slate-700">
+                  <div className="flex items-start gap-2">
+                    <CheckCircle2 className="w-4 h-4 text-blue-600 shrink-0 mt-0.5" />
+                    <div>
+                      <strong className="text-slate-900">Q2. Function Pointer Swap:</strong> Fix call-by-value parameters to pointer references.
+                    </div>
                   </div>
-                  <div className="flex items-center gap-2">
-                    <CheckCircle2 className="w-3.5 h-3.5 text-indigo-600 shrink-0" />
-                    <span>Dynamic memory malloc/free & struct pointers</span>
+                  <div className="flex items-start gap-2">
+                    <CheckCircle2 className="w-4 h-4 text-blue-600 shrink-0 mt-0.5" />
+                    <div>
+                      <strong className="text-slate-900">Q4. Array Average Calculation:</strong> Fix 0-index loop start and integer division truncation.
+                    </div>
                   </div>
-                  <div className="flex items-center gap-2">
-                    <CheckCircle2 className="w-3.5 h-3.5 text-indigo-600 shrink-0" />
-                    <span>Python dunder methods (__eq__, __hash__)</span>
-                  </div>
-                  <div className="flex items-center gap-2">
-                    <CheckCircle2 className="w-3.5 h-3.5 text-indigo-600 shrink-0" />
-                    <span>Singly linked list pointer severing</span>
+                  <div className="flex items-start gap-2">
+                    <CheckCircle2 className="w-4 h-4 text-blue-600 shrink-0 mt-0.5" />
+                    <div>
+                      <strong className="text-slate-900">Q6. Binary Search Algorithm:</strong> Complete missing partition bounds update.
+                    </div>
                   </div>
                 </div>
               </div>
 
-              <div className="mt-6 pt-4 border-t border-slate-100 flex items-center justify-between text-xs text-slate-500 font-mono">
-                <span>Format: C & Python</span>
-                <span>Depth: Comprehensive</span>
+              {/* Python Questions Track */}
+              <div className="bg-slate-50/60 p-4 rounded-xl border border-slate-200">
+                <div className="flex items-center justify-between mb-3">
+                  <span className="text-xs font-bold text-slate-900 uppercase tracking-wider font-mono">
+                    Python Challenges (4 Questions)
+                  </span>
+                  <span className="text-[10px] font-bold px-2 py-0.5 rounded bg-amber-100 text-amber-800">Python</span>
+                </div>
+                <div className="space-y-2.5 text-xs text-slate-700">
+                  <div className="flex items-start gap-2">
+                    <CheckCircle2 className="w-4 h-4 text-emerald-600 shrink-0 mt-0.5" />
+                    <div>
+                      <strong className="text-slate-900">Q1. Loop Even Numbers Sum:</strong> Fix off-by-one exclusive upper loop range bounds.
+                    </div>
+                  </div>
+                  <div className="flex items-start gap-2">
+                    <CheckCircle2 className="w-4 h-4 text-emerald-600 shrink-0 mt-0.5" />
+                    <div>
+                      <strong className="text-slate-900">Q3. If-Else Grade Categorization:</strong> Fix cascading branch precedence ordering.
+                    </div>
+                  </div>
+                  <div className="flex items-start gap-2">
+                    <CheckCircle2 className="w-4 h-4 text-emerald-600 shrink-0 mt-0.5" />
+                    <div>
+                      <strong className="text-slate-900">Q5. Find Maximum Value:</strong> Fix negative number initialization and inverted comparator.
+                    </div>
+                  </div>
+                  <div className="flex items-start gap-2">
+                    <CheckCircle2 className="w-4 h-4 text-emerald-600 shrink-0 mt-0.5" />
+                    <div>
+                      <strong className="text-slate-900">Q7. Tower of Hanoi Recursion:</strong> Fill missing recursive auxiliary peg transfer call.
+                    </div>
+                  </div>
+                </div>
               </div>
             </div>
 
-            {/* Round 3 */}
-            <div className="bg-white rounded-xl border border-slate-200 shadow-2xs p-6 flex flex-col justify-between hover:border-blue-300 transition-all">
-              <div>
-                <div className="flex items-center justify-between mb-4">
-                  <span className="text-xs font-bold tracking-wider text-rose-700 bg-rose-50 px-2.5 py-1 rounded">
-                    ROUND 3
-                  </span>
-                  <span className="text-xs font-semibold text-slate-500 font-mono">
-                    5 Questions · 100 Marks
-                  </span>
-                </div>
-
-                <h3 className="text-lg font-bold text-slate-900 mb-1">
-                  Advanced Professional Debugging
-                </h3>
-                <p className="text-xs text-slate-500 mb-4">
-                  Hard memory corruption, MRO linearization, and complex algorithms.
-                </p>
-
-                <div className="space-y-2 border-t border-slate-100 pt-4 text-xs text-slate-600">
-                  <div className="flex items-center gap-2">
-                    <CheckCircle2 className="w-3.5 h-3.5 text-rose-600 shrink-0" />
-                    <span>Double free & dangling pointers in stack nodes</span>
-                  </div>
-                  <div className="flex items-center gap-2">
-                    <CheckCircle2 className="w-3.5 h-3.5 text-rose-600 shrink-0" />
-                    <span>Diamond inheritance & cooperative super() flow</span>
-                  </div>
-                  <div className="flex items-center gap-2">
-                    <CheckCircle2 className="w-3.5 h-3.5 text-rose-600 shrink-0" />
-                    <span>Lomuto partition index underflow on duplicates</span>
-                  </div>
-                  <div className="flex items-center gap-2">
-                    <CheckCircle2 className="w-3.5 h-3.5 text-rose-600 shrink-0" />
-                    <span>LRU Cache doubly linked list node corruption</span>
-                  </div>
-                </div>
-              </div>
-
-              <div className="mt-6 pt-4 border-t border-slate-100 flex items-center justify-between text-xs text-slate-500 font-mono">
-                <span>Format: C & Python</span>
-                <span>Tier: Master Level</span>
-              </div>
+            <div className="mt-6 pt-4 border-t border-slate-100 flex flex-col sm:flex-row sm:items-center justify-between text-xs text-slate-500 gap-2">
+              <span>Automatic dynamic mark distribution on organizer total marks change</span>
+              <span className="font-mono text-blue-600 font-semibold">Automatic Next Question On Submit</span>
             </div>
-
           </div>
 
         </div>
