@@ -656,7 +656,11 @@ if (process.env.NODE_ENV === 'production' || fs.existsSync(path.join(distPath, '
   });
 }
 
-// Start Express server
-app.listen(PORT, '0.0.0.0', () => {
-  console.log(`[BUGWEST Backend API] Listening on http://0.0.0.0:${PORT}`);
-});
+// Start Express server only when executed directly (not when imported as a module or in serverless)
+if (require.main === module) {
+  app.listen(PORT, '0.0.0.0', () => {
+    console.log(`[BUGWEST Backend API] Listening on http://0.0.0.0:${PORT}`);
+  });
+}
+
+module.exports = app;

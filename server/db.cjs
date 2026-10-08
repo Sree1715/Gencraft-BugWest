@@ -1,9 +1,25 @@
 const path = require('path');
+const fs = require('fs');
 const INITIAL_QUESTIONS = require('./questionsData.json');
 
 // DB_PATH env var lets Docker point the database at the mounted volume (/data/bugwest.db).
-// Falls back to the repo-local path for local development.
-const dbPath = process.env.DB_PATH || path.join(__dirname, '..', 'bugwest.db');
+// On Vercel / serverless lambdas, the root filesystem is read-only, so use /tmp/bugwest.db.
+const isServerless = !!(process.env.VERCEL || process.env.AWS_LAMBDA_FUNCTION_NAME);
+const defaultDbPath = isServerless
+  ? path.join('/tmp', 'bugwest.db')
+  : path.join(__dirname, '..', 'bugwest.db');
+const dbPath = process.env.DB_PATH || defaultDbPath;
+
+if (isServerless && !fs.existsSync(dbPath)) {
+  const seedPath = path.join(__dirname, '..', 'bugwest.db');
+  if (fs.existsSync(seedPath)) {
+    try {
+      fs.copyFileSync(seedPath, dbPath);
+    } catch (e) {
+      console.warn('[Database] Seed DB copy skipped:', e.message);
+    }
+  }
+}
 
 let db;
 
