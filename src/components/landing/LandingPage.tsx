@@ -126,8 +126,8 @@ export const LandingPage: React.FC<LandingPageProps> = ({
                 Authentic Bug Vectors
               </h3>
               <p className="text-sm text-slate-600 leading-relaxed">
-                Problems are carefully drafted based on real production bugs: uninitialized memory, sequence edge cases, 
-                palindrome normalization, list deduplication, and prime boundary conditions.
+                Problems are carefully drafted based on real coding flaws: pointer swapping, integer division truncation, 
+                binary search partitions, loop boundaries, if-else precedence, and recursion.
               </p>
             </div>
 
@@ -207,7 +207,7 @@ export const LandingPage: React.FC<LandingPageProps> = ({
               <div className="bg-slate-50/60 p-4 rounded-xl border border-slate-200">
                 <div className="flex items-center justify-between mb-3">
                   <span className="text-xs font-bold text-slate-900 uppercase tracking-wider font-mono">
-                    C Challenges (4 Questions)
+                    C Challenges (3 Questions)
                   </span>
                   <span className="text-[10px] font-bold px-2 py-0.5 rounded bg-blue-100 text-blue-800">C</span>
                 </div>
@@ -215,25 +215,19 @@ export const LandingPage: React.FC<LandingPageProps> = ({
                   <div className="flex items-start gap-2">
                     <CheckCircle2 className="w-4 h-4 text-blue-600 shrink-0 mt-0.5" />
                     <div>
-                      <strong className="text-slate-900">Q1. Array Sum Accumulator:</strong> Fix uninitialized accumulator variable and missing terminator.
+                      <strong className="text-slate-900">Q2. Function Pointer Swap:</strong> Fix call-by-value parameters to pointer references.
                     </div>
                   </div>
                   <div className="flex items-start gap-2">
                     <CheckCircle2 className="w-4 h-4 text-blue-600 shrink-0 mt-0.5" />
                     <div>
-                      <strong className="text-slate-900">Q2. Fibonacci Sequence:</strong> Fix sequence formula calculation and comma separator syntax.
+                      <strong className="text-slate-900">Q4. Array Average Calculation:</strong> Fix 0-index loop start and integer division truncation.
                     </div>
                   </div>
                   <div className="flex items-start gap-2">
                     <CheckCircle2 className="w-4 h-4 text-blue-600 shrink-0 mt-0.5" />
                     <div>
-                      <strong className="text-slate-900">Q3. Factorial Calculation:</strong> Fix 0! base case and 1-based loop boundary.
-                    </div>
-                  </div>
-                  <div className="flex items-start gap-2">
-                    <CheckCircle2 className="w-4 h-4 text-blue-600 shrink-0 mt-0.5" />
-                    <div>
-                      <strong className="text-slate-900">Q4. String Reversal:</strong> Fix array boundary bounds and symmetric swap pointers.
+                      <strong className="text-slate-900">Q6. Binary Search Algorithm:</strong> Complete missing partition bounds update.
                     </div>
                   </div>
                 </div>
@@ -243,7 +237,7 @@ export const LandingPage: React.FC<LandingPageProps> = ({
               <div className="bg-slate-50/60 p-4 rounded-xl border border-slate-200">
                 <div className="flex items-center justify-between mb-3">
                   <span className="text-xs font-bold text-slate-900 uppercase tracking-wider font-mono">
-                    Python Challenges (3 Questions)
+                    Python Challenges (4 Questions)
                   </span>
                   <span className="text-[10px] font-bold px-2 py-0.5 rounded bg-amber-100 text-amber-800">Python</span>
                 </div>
@@ -251,19 +245,25 @@ export const LandingPage: React.FC<LandingPageProps> = ({
                   <div className="flex items-start gap-2">
                     <CheckCircle2 className="w-4 h-4 text-emerald-600 shrink-0 mt-0.5" />
                     <div>
-                      <strong className="text-slate-900">Q5. Palindrome Checker:</strong> Fix case-folding normalization and string slicing inversion.
+                      <strong className="text-slate-900">Q1. Loop Even Numbers Sum:</strong> Fix off-by-one exclusive upper loop range bounds.
                     </div>
                   </div>
                   <div className="flex items-start gap-2">
                     <CheckCircle2 className="w-4 h-4 text-emerald-600 shrink-0 mt-0.5" />
                     <div>
-                      <strong className="text-slate-900">Q6. List Deduplication:</strong> Fix set ordering bug and preserve first-seen item order.
+                      <strong className="text-slate-900">Q3. If-Else Grade Categorization:</strong> Fix cascading branch precedence ordering.
                     </div>
                   </div>
                   <div className="flex items-start gap-2">
                     <CheckCircle2 className="w-4 h-4 text-emerald-600 shrink-0 mt-0.5" />
                     <div>
-                      <strong className="text-slate-900">Q7. Prime Number Check:</strong> Fix boundary checks for n &le; 1 and range termination.
+                      <strong className="text-slate-900">Q5. Find Maximum Value:</strong> Fix negative number initialization and inverted comparator.
+                    </div>
+                  </div>
+                  <div className="flex items-start gap-2">
+                    <CheckCircle2 className="w-4 h-4 text-emerald-600 shrink-0 mt-0.5" />
+                    <div>
+                      <strong className="text-slate-900">Q7. Tower of Hanoi Recursion:</strong> Fill missing recursive auxiliary peg transfer call.
                     </div>
                   </div>
                 </div>

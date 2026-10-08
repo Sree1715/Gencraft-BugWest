@@ -16,6 +16,7 @@ export interface TestCase {
   expectedOutput: string;
   description?: string;
   isHidden?: boolean;
+  buggyOutput?: string;
 }
 
 export interface Question {

@@ -182,44 +182,44 @@ export const ParticipantDashboard: React.FC<ParticipantDashboardProps> = ({
           <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
             <div className="p-4 bg-slate-50 rounded-xl border border-slate-200">
               <span className="text-xs font-bold text-slate-900 uppercase tracking-wider block mb-2 font-mono">
-                C Language Challenges (4 Questions):
+                C Language Challenges (3 Questions):
               </span>
               <ul className="space-y-2 text-xs text-slate-600">
                 <li className="flex items-center gap-2">
                   <CheckCircle2 className="w-3.5 h-3.5 text-blue-600 shrink-0" />
-                  <span>Q1. Array sum uninitialized accumulator & syntax</span>
+                  <span>Q2. Function Pointer Swap</span>
                 </li>
                 <li className="flex items-center gap-2">
                   <CheckCircle2 className="w-3.5 h-3.5 text-blue-600 shrink-0" />
-                  <span>Q2. Fibonacci sequence iteration and formula</span>
+                  <span>Q4. Array Average Calculation</span>
                 </li>
                 <li className="flex items-center gap-2">
                   <CheckCircle2 className="w-3.5 h-3.5 text-blue-600 shrink-0" />
-                  <span>Q3. Factorial base case and loop boundaries</span>
-                </li>
-                <li className="flex items-center gap-2">
-                  <CheckCircle2 className="w-3.5 h-3.5 text-blue-600 shrink-0" />
-                  <span>Q4. String reversal in-place pointer swapping</span>
+                  <span>Q6. Binary Search Algorithm</span>
                 </li>
               </ul>
             </div>
 
             <div className="p-4 bg-slate-50 rounded-xl border border-slate-200">
               <span className="text-xs font-bold text-slate-900 uppercase tracking-wider block mb-2 font-mono">
-                Python Language Challenges (3 Questions):
+                Python Language Challenges (4 Questions):
               </span>
               <ul className="space-y-2 text-xs text-slate-600">
                 <li className="flex items-center gap-2">
                   <CheckCircle2 className="w-3.5 h-3.5 text-emerald-600 shrink-0" />
-                  <span>Q5. Palindrome checker with case normalization</span>
+                  <span>Q1. Loop Even Numbers Sum</span>
                 </li>
                 <li className="flex items-center gap-2">
                   <CheckCircle2 className="w-3.5 h-3.5 text-emerald-600 shrink-0" />
-                  <span>Q6. List deduplication with order preservation</span>
+                  <span>Q3. If-Else Grade Categorization</span>
                 </li>
                 <li className="flex items-center gap-2">
                   <CheckCircle2 className="w-3.5 h-3.5 text-emerald-600 shrink-0" />
-                  <span>Q7. Prime number boundary checking and factoring</span>
+                  <span>Q5. Find Maximum Value</span>
+                </li>
+                <li className="flex items-center gap-2">
+                  <CheckCircle2 className="w-3.5 h-3.5 text-emerald-600 shrink-0" />
+                  <span>Q7. Tower of Hanoi Recursion</span>
                 </li>
               </ul>
             </div>
